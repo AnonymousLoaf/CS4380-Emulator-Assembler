@@ -6,34 +6,54 @@
 using namespace std;
 
 int main() {
-	string fileName;
-	ifstream binFile;
+    string fileName;
+    ifstream binFile;
 
-        cout << "Enter file path: ";
-        cin >> fileName;
+    cout << "Enter file path: ";
+    cin >> fileName;
 
-	binFile.open(fileName, ios::binary);
-	if (!binFile.is_open()) {
-		cerr << "ERROR! Could not OPEN the given file" << endl;
-		return 1;
-	}
-        
-	binFile.read(reinterpret_cast<char*>(prog_mem), memory_size);
-	if (!binFile.good()) {
-		cerr <<"ERROR! Could not READ the given file" << endl;
-		return 1;
-	}
-	
-	binFile.close();
-	
-	while (true) {
+    binFile.open(fileName, ios::binary);
+    if (!binFile.is_open()) {
+        cerr << "ERROR! Could not OPEN the given file" << endl;
+        return 1;
+    }
+
+    // Get the file size
+    binFile.seekg(0, ios::end);
+    streampos fileSize = binFile.tellg();
+    binFile.seekg(0, ios::beg);
+
+    // Check if the file size exceeds a maximum limit (e.g., 131072 bytes)
+    const int maxFileSize = 131072;
+    if (fileSize > maxFileSize) {
+        cerr << "ERROR! File size exceeds the maximum limit of " << maxFileSize << " bytes." << endl;
+        binFile.close();
+        return 1;
+    }
+
+    // Dynamically allocate memory for prog_mem
+    unsigned char* prog_mem = new unsigned char[fileSize];
+
+    // Read the file into prog_mem
+    binFile.read(reinterpret_cast<char*>(prog_mem), fileSize);
+    if (!binFile.good()) {
+        cerr << "ERROR! Could not READ the given file" << endl;
+        binFile.close();
+        delete[] prog_mem; // Release dynamically allocated memory
+        return 1;
+    }
+
+    binFile.close();
+
+    while (true) {
         // Fetch instruction
         fetch();
 
-        // Check it it's valid
+        // Check if it's valid
         if (!decode()) {
             // Handle invalid instruction
-            cerr << "INVALID INSTRUCTION AT: " << PC << endl;
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+            delete[] prog_mem; // Release dynamically allocated memory
             return 1;
         }
 
@@ -41,10 +61,13 @@ int main() {
         execute();
 
         // Check if a TRP 0
-        if (cntrl_regs[OPERATION] == 21 && cntrl_regs[OPERAND_1] == 0 && cntrl_regs[OPERAND_2] == 0) {
+        if (cntrl_regs[OPERATION] == 21) {
             break; // Exit the execution loop
         }
     }
 
-	return 0;
+    // Release dynamically allocated memory
+    delete[] prog_mem;
+
+    return 0;
 }

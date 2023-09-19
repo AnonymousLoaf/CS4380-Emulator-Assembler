@@ -24,9 +24,9 @@ void fetch() {
     cntrl_regs[OPERAND_2] = operand_2;
 
     // Debug: Print the control registers
-    cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
-    cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
-    cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
+    //cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
+    //cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
+    //cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
 }
 
 
@@ -52,4 +52,83 @@ bool decode() {
 }
 
 void execute() {
+    // Extract the instruction
+    unsigned int operation = cntrl_regs[OPERATION];
+    unsigned int operand_1 = cntrl_regs[OPERAND_1];
+    unsigned int operand_2 = cntrl_regs[OPERAND_2];
+
+    // Switch statement to handle all Instructions
+    switch (operation) {
+    case 1: // JMP
+        // Jump to address - move the PC to operand_1
+        reg_file[PC] = operand_1;
+        break;
+    case 7: // MOV
+        // Move contents of operand_2 to operand_1
+        reg_file[operand_1] = reg_file[operand_2];
+        break;
+    case 10: // LDR
+        // Load integer at address operand_2 to operand_1
+        reg_file[operand_1] = static_cast<unsigned int>(prog_mem[operand_2]);
+        break;
+    case 12: // LDB
+        // Load byte at address operand_2 to operand_1
+        reg_file[operand_1] = prog_mem[operand_2];
+        break;
+    case 13: // ADD
+        // Add operand_2 to operand_1 and store in operand_1
+        reg_file[operand_1] += reg_file[operand_2];
+        break;
+    case 15: // SUB
+        // Subtract operand_2 from operand_1 and store in operand_1
+        reg_file[operand_1] -= reg_file[operand_2];
+        break;
+    case 16: // MUL
+        // Multiply opeand_2 by operand_1 and store in operand_1
+        reg_file[operand_1] *= reg_file[operand_2];
+        break;
+    case 17: // DIV
+        // Divide operand_1 by operand_2 and store in operand_1
+        if (reg_file[operand_2] != 0) {
+            reg_file[operand_1] /= reg_file[operand_2];
+        }
+        else {
+            cerr << "Cannot divide by 0!" << endl;
+        }
+        break;
+    case 21:
+        switch (operand_1) {
+        case 0:
+            // Executes the STOP/Exit routine
+            stop = true;
+            break;
+        case 1:
+            // Write int in R3 to console
+            cout << static_cast<int>(reg_file[3]);
+            break;
+        case 3:
+            // Write char in R3 to console
+            cout << static_cast<char>(reg_file[3]);
+            break;
+        case 98:
+            // Print all registers to console
+            for (int i = 0; i < 16; ++i) {
+                cout << "R" << i << "   " << reg_file[i] << endl;
+            }
+            cout << "PC: " << reg_file[PC] << endl;
+            cout << "SL: " << reg_file[SL] << endl;
+            cout << "SB: " << reg_file[SB] << endl;
+            cout << "SP: " << reg_file[SP] << endl;
+            cout << "FP: " << reg_file[FP] << endl;
+            cout << "HP: " << reg_file[HP] << endl;
+            break;
+        default:
+            cerr << "Invalid TRP instruction: " << operand_1 << endl;
+            break;
+        }
+        break;
+    default:
+        cerr << "Invalid instruction: " << operation << endl;
+        break;
+    }
 }

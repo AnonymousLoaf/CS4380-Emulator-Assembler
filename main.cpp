@@ -10,8 +10,9 @@ int main() {
     string fileName;
     ifstream binFile;
 
-    cout << "Enter file path: ";
-    cin >> fileName;
+    //cout << "Enter file path: ";
+    //cin >> fileName;
+    fileName = "C:/Users/theda/source/repos/Project1/Project1/HelloWorld.bin";
 
     binFile.open(fileName, ios::binary);
     if (!binFile.is_open()) {
@@ -40,14 +41,14 @@ int main() {
     if (!binFile.good()) {
         cerr << "ERROR! Could not READ the given file" << endl;
         binFile.close();
-        delete[] prog_mem; // Release dynamically allocated memory
         return 1;
     }
 
     binFile.close();
     reg_file[PC] = prog_mem[0];
 
-    while (true) {
+    bool stop = false;
+    while (!stop) {
         // Fetch instruction
         fetch();
 
@@ -55,21 +56,12 @@ int main() {
         if (!decode()) {
             // Handle invalid instruction
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
-            delete[] prog_mem; // Release dynamically allocated memory
             return 1;
         }
 
         // Execute instruction
         execute();
-
-        // Check if a TRP 0
-        if (cntrl_regs[OPERATION] == 21) {
-            break; // Exit the execution loop
-        }
     }
-
-    // Release dynamically allocated memory
-    delete[] prog_mem;
 
     return 0;
 }

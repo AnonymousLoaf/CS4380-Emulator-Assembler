@@ -11,6 +11,7 @@ void execute();
 extern unsigned int reg_file[];
 extern unsigned char prog_mem[];
 extern unsigned int cntrl_regs[];
+extern bool stop;
 
 // Enums
 enum RegNames {

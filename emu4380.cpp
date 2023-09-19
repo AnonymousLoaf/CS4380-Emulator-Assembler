@@ -100,7 +100,7 @@ void execute() {
         switch (operand_1) {
         case 0:
             // Executes the STOP/Exit routine
-            stop = true;
+            stop_execution = true;
             break;
         case 1:
             // Write int in R3 to console

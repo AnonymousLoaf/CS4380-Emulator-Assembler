@@ -5,14 +5,14 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
+bool stop_execution = false;
 
 int main() {
     string fileName;
     ifstream binFile;
 
-    //cout << "Enter file path: ";
-    //cin >> fileName;
-    fileName = "C:/Users/theda/source/repos/Project1/Project1/HelloWorld.bin";
+    cout << "Enter file path: ";
+    cin >> fileName;
 
     binFile.open(fileName, ios::binary);
     if (!binFile.is_open()) {
@@ -47,8 +47,7 @@ int main() {
     binFile.close();
     reg_file[PC] = prog_mem[0];
 
-    bool stop = false;
-    while (!stop) {
+    while (!stop_execution) {
         // Fetch instruction
         fetch();
 

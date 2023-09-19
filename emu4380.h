@@ -1,5 +1,6 @@
 #ifndef EMU4380_H
 #define EMU4380_H
+#define INSTRUCTION_SIZE 4
 
 // Function prototypes
 void fetch();

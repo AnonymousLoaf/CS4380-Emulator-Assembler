@@ -4,6 +4,7 @@
 #include "emu4380.h"
 
 using namespace std;
+extern unsigned char prog_mem[];
 
 int main() {
     string fileName;
@@ -20,10 +21,10 @@ int main() {
 
     // Get the file size
     binFile.seekg(0, ios::end);
-    streampos fileSize = binFile.tellg();
+    int fileSize = binFile.tellg();
     binFile.seekg(0, ios::beg);
 
-    // Check if the file size exceeds a maximum limit (e.g., 131072 bytes)
+    // Check if the file size exceeds the limit
     const int maxFileSize = 131072;
     if (fileSize > maxFileSize) {
         cerr << "ERROR! File size exceeds the maximum limit of " << maxFileSize << " bytes." << endl;
@@ -32,7 +33,7 @@ int main() {
     }
 
     // Dynamically allocate memory for prog_mem
-    unsigned char* prog_mem = new unsigned char[fileSize];
+    // unsigned char* prog_mem = new unsigned char[fileSize];
 
     // Read the file into prog_mem
     binFile.read(reinterpret_cast<char*>(prog_mem), fileSize);
@@ -44,6 +45,7 @@ int main() {
     }
 
     binFile.close();
+    reg_file[PC] = prog_mem[0];
 
     while (true) {
         // Fetch instruction

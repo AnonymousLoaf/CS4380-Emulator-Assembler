@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const int memory_size = 128 * 1024;
+const int memory_size = 131072;
 unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
@@ -11,11 +11,16 @@ unsigned int reg_file[22];
 
 void fetch() {
     // Read the instruction
-    unsigned int operation = static_cast<unsigned int>(prog_mem[reg_file[PC]]);
+    uint32_t* instruction_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    unsigned int operation = *instruction_ptr;
     reg_file[PC] += INSTRUCTION_SIZE;
-    unsigned int operand_1 = static_cast<unsigned int>(prog_mem[reg_file[PC]]);
+
+    uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    unsigned int operand_1 = *operand_1_ptr;
     reg_file[PC] += INSTRUCTION_SIZE;
-    unsigned int operand_2 = static_cast<unsigned int>(prog_mem[reg_file[PC]]);
+
+    uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    unsigned int operand_2 = *operand_2_ptr;
     reg_file[PC] += INSTRUCTION_SIZE;
 
     // Update control registers
@@ -23,10 +28,10 @@ void fetch() {
     cntrl_regs[OPERAND_1] = operand_1;
     cntrl_regs[OPERAND_2] = operand_2;
 
-    // Debug: Print the control registers
-    //cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
-    //cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
-    //cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
+    // Print the control registers for debugging
+    // cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
+    // cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
+    // cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
 }
 
 
@@ -52,7 +57,7 @@ bool decode() {
 }
 
 void execute() {
-    // Extract the instruction
+    // Extract the operation and operands
     unsigned int operation = cntrl_regs[OPERATION];
     unsigned int operand_1 = cntrl_regs[OPERAND_1];
     unsigned int operand_2 = cntrl_regs[OPERAND_2];

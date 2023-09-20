@@ -33,9 +33,6 @@ int main() {
         return 1;
     }
 
-    // Dynamically allocate memory for prog_mem
-    // unsigned char* prog_mem = new unsigned char[fileSize];
-
     // Read the file into prog_mem
     binFile.read(reinterpret_cast<char*>(prog_mem), fileSize);
     if (!binFile.good()) {
@@ -45,15 +42,16 @@ int main() {
     }
 
     binFile.close();
+
+    // Set PC to the first address indicated by the program memory
     reg_file[PC] = prog_mem[0];
 
     while (!stop_execution) {
         // Fetch instruction
         fetch();
 
-        // Check if it's valid
+        // Decode instruction - check validity
         if (!decode()) {
-            // Handle invalid instruction
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             return 1;
         }

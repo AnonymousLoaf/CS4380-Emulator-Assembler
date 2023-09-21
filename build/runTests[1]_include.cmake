@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/theda/CS4380-Emulator-Assembler/build/runTests[1]_tests.cmake")
+  include("/mnt/c/Users/theda/CS4380-Emulator-Assembler/build/runTests[1]_tests.cmake")
+else()
+  add_test(runTests_NOT_BUILT runTests_NOT_BUILT)
+endif()

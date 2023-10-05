@@ -7,6 +7,7 @@ const int memory_size = 131072;
 unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
+bool stop_execution = false;
 
 
 void fetch() {
@@ -23,15 +24,18 @@ void fetch() {
     unsigned int operand_2 = *operand_2_ptr;
     reg_file[PC] += INSTRUCTION_SIZE;
 
+    if (operation == 1 && (operand_1 < 0 || operand_1 >= memory_size)) {
+            cerr << "Invalid JMP instruction (Out of range): " << operand_1 << endl;
+            stop_execution = true;
+            return;
+        }
+    
     // Update control registers
     cntrl_regs[OPERATION] = operation;
     cntrl_regs[OPERAND_1] = operand_1;
     cntrl_regs[OPERAND_2] = operand_2;
 
-    // Print the control registers for debugging
-    // cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
-    // cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
-    // cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
+    
 }
 
 
@@ -52,6 +56,8 @@ bool decode() {
     case 21: // TRP
         return true;
     default:
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        stop_execution = true;
         return false;
     }
 }
@@ -74,7 +80,7 @@ void execute() {
         break;
     case 10: // LDR
         // Load integer at address operand_2 to operand_1
-        reg_file[operand_1] = static_cast<unsigned int>(prog_mem[operand_2]);
+        reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
         break;
     case 12: // LDB
         // Load byte at address operand_2 to operand_1
@@ -118,22 +124,23 @@ void execute() {
         case 98:
             // Print all registers to console
             for (int i = 0; i < 16; ++i) {
-                cout << "R" << i << "   " << reg_file[i] << endl;
+                cout << "R" << i << "\t" << reg_file[i] << endl;
             }
-            cout << "PC: " << reg_file[PC] << endl;
-            cout << "SL: " << reg_file[SL] << endl;
-            cout << "SB: " << reg_file[SB] << endl;
-            cout << "SP: " << reg_file[SP] << endl;
-            cout << "FP: " << reg_file[FP] << endl;
-            cout << "HP: " << reg_file[HP] << endl;
+            cout << "PC:\t" << reg_file[PC] << endl;
+            cout << "SL:\t" << reg_file[SL] << endl;
+            cout << "SB:\t" << reg_file[SB] << endl;
+            cout << "SP:\t" << reg_file[SP] << endl;
+            cout << "FP:\t" << reg_file[FP] << endl;
+            cout << "HP:\t" << reg_file[HP] << endl;
             break;
         default:
-            cerr << "Invalid TRP instruction: " << operand_1 << endl;
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             break;
         }
         break;
     default:
-        cerr << "Invalid instruction: " << operation << endl;
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        stop_execution = true;
         break;
     }
 }

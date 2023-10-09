@@ -38,7 +38,9 @@ bool decode() {
     switch (operation) {
     case 1:  // JMP
     case 7:  // MOV
+    case 9:  // STR
     case 10: // LDR
+    case 11: // STB
     case 12: // LDB
     case 13: // ADD
     case 15: // SUB

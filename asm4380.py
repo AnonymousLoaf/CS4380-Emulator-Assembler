@@ -1,4 +1,23 @@
-def pass_one_parse(asm_file: str):
+INSTRUCTION_MAP = {
+    'JMP':  (1).to_bytes(4, "little", signed=True),
+    'MOV':  (7).to_bytes(4, "little", signed=True),
+    'STR':  (9).to_bytes(4, "little", signed=True),
+    'LDR':  (10).to_bytes(4, "little", signed=True),
+    'STB':  (11).to_bytes(4, "little", signed=True),
+    'LDB':  (12).to_bytes(4, "little", signed=True),
+    'ADD':  (13).to_bytes(4, "little", signed=True),
+    'SUB':  (15).to_bytes(4, "little", signed=True),
+    'MUL':  (16).to_bytes(4, "little", signed=True),
+    'DIV':  (17).to_bytes(4, "little", signed=True),
+    'TRP':  (21).to_bytes(4, "little", signed=True),
+    }
+
+DIRECTIVE_MAP = {
+    '.INT': (0).to_bytes(4, "little", signed=True),
+    '.BYT': (1).to_bytes(4, "little", signed=True),
+}
+
+def _parse(asm_file: str):
     """
     This function will parse the assembly file and return a dictionary with the
     line number as the key and the list of elements as the value.
@@ -30,10 +49,40 @@ def clean_comments(raw_asm: dict):
                 break
     return raw_asm
 
-def main(asm_file):
-    raw_asm = pass_one_parse(asm_file)
-    # remove all comments
-    clean_asm = clean_comments(raw_asm)
-    print(clean_asm)
+def convert(clean_asm: dict):
+    pass
 
-main('HelloWorld.asm')
+def directive_to_bin(directive: str):
+    """
+    This function will convert the directive to binary
+    :param directive: the directive to be converted
+    :return: the binary representation of the directive
+    """
+    if directive not in DIRECTIVE_MAP:
+        raise ValueError(f"Invalid directive: {directive}")
+    elif directive == ".INT":
+        pass
+
+def instruction_to_bin(command: str):
+    """
+    This function will convert the instruction to binary
+    :param command: the command to be converted
+    :return: the binary representation of the command
+    """
+    if command not in INSTRUCTION_MAP:
+        raise ValueError(f"Invalid command: {command}")
+    else:
+        return INSTRUCTION_MAP[command]
+
+def main():
+    #asm_file = input("Please enter the name of the assembly file: ")
+    asm_file = "HelloWorld.asm"
+    raw_asm = _parse(asm_file)
+    clean_asm = clean_comments(raw_asm)
+    #binary_code = instruction_to_bin(clean_asm)
+    #print(binary_code)
+    with open('TEST.bin', 'wb') as f:
+        f.write(instruction_to_bin("SUB"))
+
+if __name__ == "__main__":
+    main()

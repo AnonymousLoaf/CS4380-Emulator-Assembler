@@ -7,8 +7,6 @@ using namespace std;
 extern unsigned char prog_mem[];
 bool stop_execution = false;
 
-//Project 2
-
 int main() {
     string fileName;
     ifstream binFile;

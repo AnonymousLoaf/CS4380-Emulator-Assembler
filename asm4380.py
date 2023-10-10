@@ -30,8 +30,7 @@ def _parse(asm_file: str):
         i = 0
         for line in f:
             i += 1
-            raw_asm[i] = line.split()
-    # remove all comments
+            raw_asm[i] = line.strip().split()
     return raw_asm
 
 def clean_comments(raw_asm: dict):
@@ -43,25 +42,33 @@ def clean_comments(raw_asm: dict):
     # delete any elements after a ; in the list
     for i in raw_asm:
         for j in raw_asm[i]:
-            if ";" in j:
+            if j == "'":
+                j.replace("'", " ")
+            elif ";" in j:
                 # remove all elements including and after the ;
                 raw_asm[i] = raw_asm[i][:raw_asm[i].index(j)]
                 break
+            print(j)
     return raw_asm
 
-def convert(clean_asm: dict):
-    pass
-
-def directive_to_bin(directive: str):
+def directive_to_bin(label: str, type: str, value: str):
     """
     This function will convert the directive to binary
-    :param directive: the directive to be converted
+    :param label: the label of the directive
+    :param type: the type of the directive
+    :param value: the value of the directive
     :return: the binary representation of the directive
     """
-    if directive not in DIRECTIVE_MAP:
-        raise ValueError(f"Invalid directive: {directive}")
-    elif directive == ".INT":
-        pass
+    print(value)
+    if type not in DIRECTIVE_MAP:
+        raise ValueError(f"Invalid directive: {type}")
+    elif type == ".INT":
+        # convert the value to a 32 bit signed integer
+        return (int(value)).to_bytes(4, "little", signed=True)
+    elif type == ".BYT":
+        # convert the value to a 8 bit memory location and initialize with optional decimal or ascii code
+        #return (ord(value[1])).to_bytes(1, "little", signed=True)
+        ...
 
 def instruction_to_bin(command: str):
     """
@@ -74,15 +81,22 @@ def instruction_to_bin(command: str):
     else:
         return INSTRUCTION_MAP[command]
 
+def convert(clean_asm: dict):
+    for key, value in clean_asm.items():
+        if len(value) > 1:
+            if value[1] == ".INT" or value[1] == ".BYT":
+                directive_to_bin(value[0], value[1], value[2])
+            ...
+
+
 def main():
     #asm_file = input("Please enter the name of the assembly file: ")
     asm_file = "HelloWorld.asm"
     raw_asm = _parse(asm_file)
     clean_asm = clean_comments(raw_asm)
-    #binary_code = instruction_to_bin(clean_asm)
-    #print(binary_code)
-    with open('TEST.bin', 'wb') as f:
-        f.write(instruction_to_bin("SUB"))
+    #convert(clean_asm)
+    '''with open('TEST.bin', 'wb') as f:
+        f.write(instruction_to_bin("JMP"))'''
 
 if __name__ == "__main__":
     main()

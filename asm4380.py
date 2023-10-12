@@ -1,15 +1,26 @@
 INSTRUCTION_MAP = {
-    'JMP': (1).to_bytes(4, "little", signed=True),
-    'MOV': (7).to_bytes(4, "little", signed=True),
-    'STR': (9).to_bytes(4, "little", signed=True),
-    'LDR': (10).to_bytes(4, "little", signed=True),
-    'STB': (11).to_bytes(4, "little", signed=True),
-    'LDB': (12).to_bytes(4, "little", signed=True),
-    'ADD': (13).to_bytes(4, "little", signed=True),
-    'SUB': (15).to_bytes(4, "little", signed=True),
-    'MUL': (16).to_bytes(4, "little", signed=True),
-    'DIV': (17).to_bytes(4, "little", signed=True),
-    'TRP': (21).to_bytes(4, "little", signed=True),
+    'JMP': { 'opcode': (1).to_bytes(4, "little", signed=True),
+                'operands': 1 },
+    'MOV': { 'opcode': (7).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'STR': { 'opcode': (9).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'LDR': { 'opcode': (10).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'STB': { 'opcode': (11).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'LDB': { 'opcode': (12).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'ADD': { 'opcode': (13).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'SUB': { 'opcode': (15).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'MUL': { 'opcode': (16).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'DIV': { 'opcode': (17).to_bytes(4, "little", signed=True),
+                'operands': 2 },
+    'TRP': { 'opcode': (21).to_bytes(4, "little", signed=True),
+                'operands': 1 },
 }
 
 DIRECTIVE_MAP = {
@@ -17,94 +28,153 @@ DIRECTIVE_MAP = {
     '.BYT': (1).to_bytes(4, "little", signed=True),
 }
 
+REGISTER_MAP = {
+    'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
+    'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
+    'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15,
+}
 
-def _parse(asm_file: str):
-  """
-    This function will parse the assembly file and return a dictionary with the
-    line number as the key and the list of elements as the value.
-    :param asm_file: the file to be parsed
-    :return: a dictionary with the line number as the key and the list of elements as the value
+asm_file = ""
+code_labels = {}
+data_labels = {}
+instructions = []
+
+def remove_comments(line):
     """
-  with open(asm_file, 'r') as f:
-    # open the file and parse on the whitspace
-    raw_asm = {}
-    i = 0
-    for line in f:
-      i += 1
-      line = line.replace("' '", "asdfasdf")
-      raw_asm[i] = line.strip().split()
-      for j, data in enumerate(raw_asm[i]):
-        raw_asm[i][j] = data.replace("asdfasdf", "' '")
-
-  return raw_asm
-
-
-def clean_comments(raw_asm: dict):
-  """
-    This function will remove all comments from the dictionary
-    :param master: the dictionary to be cleaned
-    :return: the cleaned dictionary
+    Removes comments from the line
+    :param line: The line
+    :return: The line without comments
     """
-  # delete any elements after a ; in the list
-  for i in sorted(raw_asm.keys()):
-    for j in raw_asm[i]:
-      if ";" in j:
-        # remove all elements including and after the ;
-        raw_asm[i] = raw_asm[i][:raw_asm[i].index(j)]
-        break
-  return raw_asm
+    # Remove comments from the line
+    if ";" in line:
+        line = line.split(";", 1)[0].strip()
+    return line
 
+def first_pass(asm_file):
+    with open(asm_file, 'r') as f:
+        line_num = 1
 
-def directive_to_bin(label: str, type: str, value: str):
-  """
-    This function will convert the directive to binary
-    :param label: the label of the directive
-    :param type: the type of the directive
-    :param value: the value of the directive
-    :return: the binary representation of the directive
-    """
-  print(value)
-  if type not in DIRECTIVE_MAP:
-    raise ValueError(f"Invalid directive: {type}")
-  elif type == ".INT":
-    # convert the value to a 32 bit signed integer
-    value = value.replace('#', '')
-    return (int(value)).to_bytes(4, "little", signed=True)
-  elif type == ".BYT":
-    # convert the value to a 8 bit memory location and initialize with optional           decimal or ascii code
-    return (ord(value[2])).to_bytes(1, "little", signed=True)
-    ...
+        for line in f:
+            line = remove_comments(line)
+            line_elements = line.strip()
+            line_elements = line_elements.replace("' '", 'temp_space')
+            line_elements = line_elements.split()
+            #Put the space back in
+            for idx in range(len(line_elements)):
+                if line_elements[idx] == 'temp_space':
+                    line_elements[idx] = "' '"
 
+            if line_elements and line_elements[0] not in DIRECTIVE_MAP and line_elements[0] not in INSTRUCTION_MAP:
+                label = line_elements[0]
+                line_elements = line_elements[1:]
+                if line_elements[0] in DIRECTIVE_MAP:
+                    data_labels[label] = line_num
+                if line_elements[0] in INSTRUCTION_MAP:
+                    code_labels[label] = line_num
+                instructions.append(line_elements)
+            else:
+                instructions.append(line_elements)
 
-def instruction_to_bin(command: str):
-  """
-    This function will convert the instruction to binary
-    :param command: the command to be converted
-    :return: the binary representation of the command
-    """
-  if command not in INSTRUCTION_MAP:
-    raise ValueError(f"Invalid command: {command}")
-  else:
-    return INSTRUCTION_MAP[command]
+            line_num += 1
 
+def second_pass(instructions):
+    line_num = 0
+    for instruction in instructions:
+        if not instruction:
+            line_num += 1
+            continue
+        elif instruction[0] in DIRECTIVE_MAP:
+            process_data_instruction(instruction)
+            line_num += 1
+        elif instruction[0] in INSTRUCTION_MAP:
+            process_code_instruction(instruction)
+            line_num += 1
+        else:
+            print(f"Error on line {line_num + 1} Unknown instruction {instruction[0]}")
 
-def convert(clean_asm: dict):
-  for key, value in clean_asm.items():
-    if len(value) >= 1:
-      if value[1] == ".INT" or value[1] == ".BYT":
-        directive_to_bin(value[0], value[1], value[2])
-      ...
+def process_data_instruction(instruction):
+    data_type = instruction[0]
+    if len(instruction) > 1:
+        data = instruction[1]
+    else:
+        data = 0
+    if data_type == '.INT':
+        data = int(data.replace('#', '')).to_bytes(4, "little", signed=True)
+        write_to_file(data)
+        for i in code_labels:
+            code_labels[i] += 4
 
+    elif data_type == '.BYT':
+        if '\\n' in data:
+            data = data.replace('\\n', '\n')
+        data = ord(data[1]).to_bytes(1, "little", signed=True)
+        write_to_file(data)
+
+    else:
+        print(f'Error. Unknown data type {data_type}')
+        return -1
+
+def process_code_instruction(instruction):
+    if instruction[0] not in INSTRUCTION_MAP:
+        print(f'Error. Unknown instruction {instruction[0]}')
+        return -1
+    else:
+        operator = instruction.pop(0)
+        num_operands = INSTRUCTION_MAP[operator]['operands']
+        operands = ('').join(instruction).split(',')
+        if len(instruction) < num_operands:
+            print(f'Error. Invalid number of operands for instruction {instruction[0]}')
+        else:
+            if operator == 'JMP':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                if operands[0] in code_labels:
+                    bytecode += code_labels[operands[0]].to_bytes(4, "little", signed=True)
+                else:
+                    bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=True)
+                write_to_file(bytecode)
+            if operator == 'TRP':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=True)
+                write_to_file(bytecode)
+            elif operator in ['MOV', 'STR', 'LDR', 'STB', 'LDB', 'ADD', 'SUB', 'MUL', 'DIV']:
+                operand1 = operands[0].strip().split()
+                operand2 = operands[1].strip().split()
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=True)
+                if operand2[0] in code_labels:
+                    bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=True)
+                elif operand2[0] in data_labels:
+                    bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=True)
+                else:
+                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=True)
+                write_to_file(bytecode)
+
+def write_to_file(binary_instruction: bytes):
+    with open('TEST.bin', 'ab') as f:
+        f.write(binary_instruction)
 
 def main():
-  #asm_file = input("Please enter the name of the assembly file: ")
-  asm_file = "HelloWorld.asm"
-  raw_asm = _parse(asm_file)
-  clean_asm = clean_comments(raw_asm)
-  convert(clean_asm)
-  '''with open('TEST.bin', 'wb') as f:
-        f.write(instruction_to_bin("JMP"))'''
+    global asm_file
+    #asm_file = input("Enter the name of the assembly file: ")
+    asm_file = "HelloWorld.asm"
+    first_pass(asm_file)
+    #Check if main exists
+    if 'MAIN' not in code_labels:
+        print("Error. MAIN label not found")
+        return -1
+    second_pass(instructions)
+    
+    for i in data_labels:
+        data_labels[i] += 4
+    #print(f'Code labels: {code_labels}')
+    #print(f'Data labels: {data_labels}')
 
+    #Append main to front of file
+    with open('TEST.bin', 'rb') as f:
+        data = f.read()
+    with open('TEST.bin', 'wb') as f:
+        f.write(code_labels['MAIN'].to_bytes(4, "little", signed=True))
+        f.write(data)
 
 if __name__ == "__main__":
-  main()
+    main()

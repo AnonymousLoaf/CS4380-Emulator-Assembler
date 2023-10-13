@@ -1,5 +1,5 @@
-H       .BYT        'H'
-e       .BYT        'e'
+H       .Byt        'H'
+e       .byt        'e'
 l       .BYT        'l'
 o       .BYT        'o'
 w       .BYT        'w'
@@ -25,7 +25,7 @@ b       .BYT        'b'
 SPACE   .BYT        ' '  ; 0x20 ;
 NL      .BYT        '\n' ; 0x0A ;
 ONE     .INT        #1
-TWO     .INT        #02  ; 0x02
+TWO     .int        #02  ; 0x02
 THR     .INT        #3
 FIV     .INT        #5
         JMP     MAIN ;does this help?
@@ -206,3 +206,4 @@ VMWORK  LDB         R3,          Y
         LDB         R3,          e
         TRP         #3
         TRP         #0
+        

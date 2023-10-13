@@ -1,26 +1,37 @@
 INSTRUCTION_MAP = {
-    'JMP': { 'opcode': (1).to_bytes(4, "little", signed=False),
-                'operands': 1 },
-    'MOV': { 'opcode': (7).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'STR': { 'opcode': (9).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'LDR': { 'opcode': (10).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'STB': { 'opcode': (11).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'LDB': { 'opcode': (12).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'ADD': { 'opcode': (13).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'SUB': { 'opcode': (15).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'MUL': { 'opcode': (16).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'DIV': { 'opcode': (17).to_bytes(4, "little", signed=False),
-                'operands': 2 },
-    'TRP': { 'opcode': (21).to_bytes(4, "little", signed=False),
-                'operands': 1 },
+    'JMP': { 
+        'opcode': (1).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'MOV': { 
+        'opcode': (7).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'STR': { 
+        'opcode': (9).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'LDR': { 
+        'opcode': (10).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'STB': { 
+        'opcode': (11).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'LDB': { 
+        'opcode': (12).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ADD': { 
+        'opcode': (13).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'SUB': { 
+        'opcode': (15).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'MUL': { 
+        'opcode': (16).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'DIV': { 
+        'opcode': (17).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'TRP': { 
+        'opcode': (21).to_bytes(4, "little", signed=False),
+        'operands': 1 },
 }
 
 DIRECTIVE_MAP = {
@@ -37,10 +48,12 @@ REGISTER_MAP = {
 filler = (0).to_bytes(4, "little", signed=False)
 
 asm_file = ""
+bin_file = ""
 code_labels = {}
 data_labels = {}
 instructions = []
 num_data_bytes = 0
+bytes_from_start = 4
 
 def remove_comments(line):
     """
@@ -54,7 +67,7 @@ def remove_comments(line):
     return line
 
 def first_pass(asm_file):
-    global num_data_bytes
+    global num_data_bytes, bytes_from_start
     with open(asm_file, 'r') as f:
         line_num = 1
 
@@ -67,37 +80,52 @@ def first_pass(asm_file):
             for idx in range(len(line_elements)):
                 if line_elements[idx] == 'temp_space':
                     line_elements[idx] = "' '"
-
-            if line_elements and line_elements[0] not in DIRECTIVE_MAP and line_elements[0] not in INSTRUCTION_MAP:
+            if len(line_elements) > 0:
+                check_upper = line_elements[0].upper()
+            if line_elements and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
                 label = line_elements[0]
                 if label[0] == '_':
                     raise Exception(f"Error on line {line_num + 1} Invalid label {label}")
                 line_elements = line_elements[1:]
-                if line_elements[0] in DIRECTIVE_MAP:
-                    data_labels[label] = line_num
-                    num_bytes = 4 if line_elements[0] == '.INT' else 1
+                check_upper = line_elements[0].upper()
+                if check_upper in DIRECTIVE_MAP:
+                    num_bytes = 4 if check_upper == '.INT' else 1
+                    data_labels[label] = bytes_from_start
                     num_data_bytes += num_bytes
-                if line_elements[0] in INSTRUCTION_MAP:
-                    code_labels[label] = line_num
+                    bytes_from_start += num_bytes
+                if check_upper in INSTRUCTION_MAP:
+                    code_labels[label] = bytes_from_start
+                    num_bytes = 12
+                    bytes_from_start += num_bytes
                 instructions.append(line_elements)
             else:
                 instructions.append(line_elements)
+                if len(line_elements) > 0:
+                    num_bytes = 12
+                    bytes_from_start += num_bytes
 
             line_num += 1
-    num_data_bytes += 4  # add 4 to accommodate this unsigned int
+
+    # Write location of first instruction to file
+    num_data_bytes += 4
     data = int(num_data_bytes).to_bytes(4, "little", signed=False)
     write_to_file(data)
 
 def second_pass(instructions):
     line_num = 0
+    in_code_section = False
     for instruction in instructions:
         if not instruction:
             line_num += 1
             continue
-        elif instruction[0] in DIRECTIVE_MAP:
+        if instruction[0].upper() in DIRECTIVE_MAP and in_code_section:
+            print(f"Error on line {line_num + 1} Directive found after code section")
+            return -1
+        elif instruction[0].upper() in DIRECTIVE_MAP and not in_code_section:
             process_data_instruction(instruction)
             line_num += 1
-        elif instruction[0] in INSTRUCTION_MAP:
+        elif instruction[0].upper() in INSTRUCTION_MAP:
+            in_code_section = True
             process_code_instruction(instruction)
             line_num += 1
         else:
@@ -105,10 +133,8 @@ def second_pass(instructions):
 
 def process_data_instruction(instruction):
     data_type = instruction[0]
-    if len(instruction) > 1:
-        data = instruction[1]
-    else:
-        data = 0
+    data_type = data_type.upper()
+    data = instruction[1] if len(instruction) > 1 else 0
     if data_type == '.INT':
         data = int(data.replace('#', '')).to_bytes(4, "little", signed=True)
         write_to_file(data)
@@ -169,18 +195,24 @@ def process_code_instruction(instruction):
                 write_to_file(bytecode)
 
 def write_to_file(binary_instruction: bytes):
-    with open('TEST.bin', 'ab') as f:
+    global bin_file
+    with open(bin_file, 'ab') as f:
         f.write(binary_instruction)
 
 def main():
-    global asm_file
-    #asm_file = input("Enter the name of the assembly file: ")
-    asm_file = "HelloWorld.asm"
+    global asm_file, bin_file
+    asm_file = ("HelloWorld.asm")
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         return -1
-    
+    else:
+        bin_file = asm_file.replace('.asm', '.bin')
+
     first_pass(asm_file)
+
+    #print(f'Code labels: {code_labels}')
+    #print(f'Data labels: {data_labels}')
+
 
     #Check if main exists
     if 'MAIN' not in code_labels:
@@ -188,9 +220,5 @@ def main():
         return -1
     
     second_pass(instructions)
-    
-    #print(f'Code labels: {code_labels}')
-    #print(f'Data labels: {data_labels}')
-
 if __name__ == "__main__":
     main()

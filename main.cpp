@@ -10,7 +10,6 @@ bool stop_execution = false;
 int main() {
     string fileName;
     ifstream binFile;
-    cout << "Updated to 2.0";
     cout << "Enter file path: ";
     cin >> fileName;
 

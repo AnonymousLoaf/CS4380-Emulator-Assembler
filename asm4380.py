@@ -1,31 +1,31 @@
 INSTRUCTION_MAP = {
-    'JMP': { 'opcode': (1).to_bytes(4, "little", signed=True),
+    'JMP': { 'opcode': (1).to_bytes(4, "little", signed=False),
                 'operands': 1 },
-    'MOV': { 'opcode': (7).to_bytes(4, "little", signed=True),
+    'MOV': { 'opcode': (7).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'STR': { 'opcode': (9).to_bytes(4, "little", signed=True),
+    'STR': { 'opcode': (9).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'LDR': { 'opcode': (10).to_bytes(4, "little", signed=True),
+    'LDR': { 'opcode': (10).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'STB': { 'opcode': (11).to_bytes(4, "little", signed=True),
+    'STB': { 'opcode': (11).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'LDB': { 'opcode': (12).to_bytes(4, "little", signed=True),
+    'LDB': { 'opcode': (12).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'ADD': { 'opcode': (13).to_bytes(4, "little", signed=True),
+    'ADD': { 'opcode': (13).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'SUB': { 'opcode': (15).to_bytes(4, "little", signed=True),
+    'SUB': { 'opcode': (15).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'MUL': { 'opcode': (16).to_bytes(4, "little", signed=True),
+    'MUL': { 'opcode': (16).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'DIV': { 'opcode': (17).to_bytes(4, "little", signed=True),
+    'DIV': { 'opcode': (17).to_bytes(4, "little", signed=False),
                 'operands': 2 },
-    'TRP': { 'opcode': (21).to_bytes(4, "little", signed=True),
+    'TRP': { 'opcode': (21).to_bytes(4, "little", signed=False),
                 'operands': 1 },
 }
 
 DIRECTIVE_MAP = {
     '.INT': (0).to_bytes(4, "little", signed=True),
-    '.BYT': (1).to_bytes(4, "little", signed=True),
+    '.BYT': (1).to_bytes(4, "little", signed=False),
 }
 
 REGISTER_MAP = {
@@ -34,10 +34,13 @@ REGISTER_MAP = {
     'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15,
 }
 
+filler = (0).to_bytes(4, "little", signed=False)
+
 asm_file = ""
 code_labels = {}
 data_labels = {}
 instructions = []
+num_data_bytes = 0
 
 def remove_comments(line):
     """
@@ -51,6 +54,7 @@ def remove_comments(line):
     return line
 
 def first_pass(asm_file):
+    global num_data_bytes
     with open(asm_file, 'r') as f:
         line_num = 1
 
@@ -66,9 +70,13 @@ def first_pass(asm_file):
 
             if line_elements and line_elements[0] not in DIRECTIVE_MAP and line_elements[0] not in INSTRUCTION_MAP:
                 label = line_elements[0]
+                if label[0] == '_':
+                    raise Exception(f"Error on line {line_num + 1} Invalid label {label}")
                 line_elements = line_elements[1:]
                 if line_elements[0] in DIRECTIVE_MAP:
                     data_labels[label] = line_num
+                    num_bytes = 4 if line_elements[0] == '.INT' else 1
+                    num_data_bytes += num_bytes
                 if line_elements[0] in INSTRUCTION_MAP:
                     code_labels[label] = line_num
                 instructions.append(line_elements)
@@ -76,6 +84,9 @@ def first_pass(asm_file):
                 instructions.append(line_elements)
 
             line_num += 1
+    num_data_bytes += 4  # add 4 to accommodate this unsigned int
+    data = int(num_data_bytes).to_bytes(4, "little", signed=False)
+    write_to_file(data)
 
 def second_pass(instructions):
     line_num = 0
@@ -101,14 +112,18 @@ def process_data_instruction(instruction):
     if data_type == '.INT':
         data = int(data.replace('#', '')).to_bytes(4, "little", signed=True)
         write_to_file(data)
-        for i in code_labels:
-            code_labels[i] += 4
 
     elif data_type == '.BYT':
-        if '\\n' in data:
+        if "'" not in data:
+            data = ascii(data).to_bytes(1, "little", signed=False)
+            write_to_file(data)
+        elif '\\n' in data:
             data = data.replace('\\n', '\n')
-        data = ord(data[1]).to_bytes(1, "little", signed=True)
-        write_to_file(data)
+            data = ord(data[1]).to_bytes(1, "little", signed=False)
+            write_to_file(data)
+        else:
+            data = ord(data[1]).to_bytes(1, "little", signed=False)
+            write_to_file(data)
 
     else:
         print(f'Error. Unknown data type {data_type}')
@@ -128,25 +143,29 @@ def process_code_instruction(instruction):
             if operator == 'JMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 if operands[0] in code_labels:
-                    bytecode += code_labels[operands[0]].to_bytes(4, "little", signed=True)
+                    bytecode += code_labels[operands[0]].to_bytes(4, "little")
                 else:
-                    bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=True)
+                    bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little")
+                bytecode += filler
                 write_to_file(bytecode)
+                
             if operator == 'TRP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=True)
+                bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=False)
+                bytecode += filler
                 write_to_file(bytecode)
+
             elif operator in ['MOV', 'STR', 'LDR', 'STB', 'LDB', 'ADD', 'SUB', 'MUL', 'DIV']:
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=True)
+                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
                 if operand2[0] in code_labels:
-                    bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=True)
+                    bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
                 elif operand2[0] in data_labels:
-                    bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=True)
+                    bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
                 else:
-                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=True)
+                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
 def write_to_file(binary_instruction: bytes):
@@ -157,24 +176,21 @@ def main():
     global asm_file
     #asm_file = input("Enter the name of the assembly file: ")
     asm_file = "HelloWorld.asm"
+    if not asm_file.endswith('.asm'):
+        print("USAGE: python asm4380.py inputFile.asm")
+        return -1
+    
     first_pass(asm_file)
+
     #Check if main exists
     if 'MAIN' not in code_labels:
         print("Error. MAIN label not found")
         return -1
+    
     second_pass(instructions)
     
-    for i in data_labels:
-        data_labels[i] += 4
     #print(f'Code labels: {code_labels}')
     #print(f'Data labels: {data_labels}')
-
-    #Append main to front of file
-    with open('TEST.bin', 'rb') as f:
-        data = f.read()
-    with open('TEST.bin', 'wb') as f:
-        f.write(code_labels['MAIN'].to_bytes(4, "little", signed=True))
-        f.write(data)
 
 if __name__ == "__main__":
     main()

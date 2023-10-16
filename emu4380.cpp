@@ -33,12 +33,7 @@ void fetch() {
     // Update control registers
     cntrl_regs[OPERATION] = operation;
     cntrl_regs[OPERAND_1] = operand_1;
-    cntrl_regs[OPERAND_2] = operand_2;
-<<<<<<< HEAD
-=======
-
-    
->>>>>>> project-1
+    cntrl_regs[OPERAND_2] = operand_2;    
 }
 
 

@@ -27,11 +27,6 @@ void fetch() {
     cntrl_regs[OPERATION] = operation;
     cntrl_regs[OPERAND_1] = operand_1;
     cntrl_regs[OPERAND_2] = operand_2;
-
-    // Print the control registers for debugging
-    // cout << "OPERATION: " << cntrl_regs[OPERATION] << endl;
-    // cout << "OPERAND_1: " << cntrl_regs[OPERAND_1] << endl;
-    // cout << "OPERAND_2: " << cntrl_regs[OPERAND_2] << endl;
 }
 
 
@@ -43,7 +38,9 @@ bool decode() {
     switch (operation) {
     case 1:  // JMP
     case 7:  // MOV
+    case 9:  // STR
     case 10: // LDR
+    case 11: // STB
     case 12: // LDB
     case 13: // ADD
     case 15: // SUB
@@ -72,10 +69,17 @@ void execute() {
         // Move contents of operand_2 to operand_1
         reg_file[operand_1] = reg_file[operand_2];
         break;
+    case 9: // STR
+        // Store integer in RS at Address
+        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
+        break;
     case 10: // LDR
         // Load integer at address operand_2 to operand_1
         reg_file[operand_1] = static_cast<unsigned int>(prog_mem[operand_2]);
         break;
+    case 11: //STB
+        // Store least significant byte in RS at Address
+        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
     case 12: // LDB
         // Load byte at address operand_2 to operand_1
         reg_file[operand_1] = prog_mem[operand_2];
@@ -111,10 +115,16 @@ void execute() {
             // Write int in R3 to console
             cout << static_cast<int>(reg_file[3]);
             break;
+        case 2:
+            // Read an integer into R3 from stdin
+            cin >> reg_file[3];
         case 3:
             // Write char in R3 to console
             cout << static_cast<char>(reg_file[3]);
             break;
+        case 4:
+            // Read a char into R3 from stdin
+            cin >> reg_file[3];
         case 98:
             // Print all registers to console
             for (int i = 0; i < 16; ++i) {

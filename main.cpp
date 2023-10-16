@@ -10,7 +10,6 @@ bool stop_execution = false;
 int main() {
     string fileName;
     ifstream binFile;
-
     cout << "Enter file path: ";
     cin >> fileName;
 

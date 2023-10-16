@@ -33,3 +33,8 @@
 
 # Specific files
 *.vscode/
+temp.py
+try
+old.py
+tempCodeRunnerFile.py
+build/

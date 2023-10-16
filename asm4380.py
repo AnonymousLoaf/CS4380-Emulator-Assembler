@@ -1,3 +1,5 @@
+import sys
+
 INSTRUCTION_MAP = {
     'JMP': { 
         'opcode': (1).to_bytes(4, "little", signed=False),
@@ -201,7 +203,7 @@ def write_to_file(binary_instruction: bytes):
 
 def main():
     global asm_file, bin_file
-    asm_file = ("HelloWorld.asm")
+    asm_file = sys.argv[1]
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         return -1

@@ -5,7 +5,7 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
-extern bool stop_execution = false;
+extern bool stop_execution;
 
 int main() {
     string fileName;

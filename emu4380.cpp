@@ -78,10 +78,17 @@ void execute() {
         // Move contents of operand_2 to operand_1
         reg_file[operand_1] = reg_file[operand_2];
         break;
+    case 9: // STR
+        // Store integer in RS at Address
+        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
+        break;
     case 10: // LDR
         // Load integer at address operand_2 to operand_1
         reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
         break;
+    case 11: //STB
+        // Store least significant byte in RS at Address
+        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
     case 12: // LDB
         // Load byte at address operand_2 to operand_1
         reg_file[operand_1] = prog_mem[operand_2];

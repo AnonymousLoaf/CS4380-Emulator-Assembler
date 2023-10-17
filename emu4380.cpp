@@ -80,7 +80,7 @@ void execute() {
         break;
     case 9: // STR
         // Store integer in RS at Address
-        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
+        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
         break;
     case 10: // LDR
         // Load integer at address operand_2 to operand_1

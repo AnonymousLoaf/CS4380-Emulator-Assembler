@@ -133,12 +133,12 @@ void execute() {
             for (int i = 0; i < 16; ++i) {
                 cout << "R" << i << "\t" << reg_file[i] << endl;
             }
-            cout << "PC:\t" << reg_file[PC] << endl;
-            cout << "SL:\t" << reg_file[SL] << endl;
-            cout << "SB:\t" << reg_file[SB] << endl;
-            cout << "SP:\t" << reg_file[SP] << endl;
-            cout << "FP:\t" << reg_file[FP] << endl;
-            cout << "HP:\t" << reg_file[HP] << endl;
+            cout << "PC\t" << reg_file[PC] << endl;
+            cout << "SL\t" << reg_file[SL] << endl;
+            cout << "SB\t" << reg_file[SB] << endl;
+            cout << "SP\t" << reg_file[SP] << endl;
+            cout << "FP\t" << reg_file[FP] << endl;
+            cout << "HP\t" << reg_file[HP] << endl;
             break;
         default:
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;

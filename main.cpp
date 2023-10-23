@@ -9,10 +9,6 @@ extern bool stop_execution;
 
 int main(int argc, char* argv[]) {
     ifstream binFile;
-<<<<<<< HEAD
-    cout << "Enter file path: ";
-    cin >> fileName;
-=======
 
     if (argc != 2) {
         cerr << "Usage: " << argv[0] << " <file_path>" << endl;
@@ -20,7 +16,6 @@ int main(int argc, char* argv[]) {
     }
     
     string fileName = argv[1];
->>>>>>> project-1
 
     binFile.open(fileName, ios::binary);
     if (!binFile.is_open()) {

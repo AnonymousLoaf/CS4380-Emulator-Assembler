@@ -29,6 +29,12 @@ void fetch() {
             stop_execution = true;
             return;
         }
+    if (operation == 1 && operand_1 == reg_file[PC]) {
+            cerr << "Invalid JMP instruction (Infinite loop): " << operand_1 << endl;
+            stop_execution = true;
+            return;
+    }
+    // Other edge cases for JMP
     
     // Update control registers
     cntrl_regs[OPERATION] = operation;

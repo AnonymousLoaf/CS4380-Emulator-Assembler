@@ -56,6 +56,7 @@ bool decode() {
         valid = false;
     }
         break;
+    case 9: // STR
     case 10: // LDR
     case 11: // STB
     case 12: // LDB

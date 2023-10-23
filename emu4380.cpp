@@ -166,7 +166,7 @@ void execute() {
         case 4:
             // Read a char into R3 from stdin
             char input_char;
-            cin >> input_char;
+            input_char = cin.get();
             reg_file[3] = static_cast<unsigned int>(input_char);
             break;
         case 98:

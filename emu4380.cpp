@@ -7,6 +7,7 @@ const int memory_size = 131072;
 unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
+bool stop_execution = false;
 
 
 void fetch() {
@@ -22,7 +23,7 @@ void fetch() {
     uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
     unsigned int operand_2 = *operand_2_ptr;
     reg_file[PC] += INSTRUCTION_SIZE;
-
+    
     // Update control registers
     cntrl_regs[OPERATION] = operation;
     cntrl_regs[OPERAND_1] = operand_1;
@@ -31,27 +32,66 @@ void fetch() {
 
 
 bool decode() {
-    // Extract the operation code
     int operation = cntrl_regs[OPERATION];
+    int operand_1 = cntrl_regs[OPERAND_1];
+    int operand_2 = cntrl_regs[OPERAND_2];
 
-    // Validate
+    //cout << "Operation: " << operation << endl;
+    //cout << "Operand 1: " << operand_1 << endl;
+    //cout << "Operand 2: " << operand_2 << endl;
+
+    bool valid = true;
+
+    // Specific error handling
     switch (operation) {
     case 1:  // JMP
+        if (operand_1 >= memory_size || operand_1 < 0) {
+            valid = false;
+        }
+        break;
     case 7:  // MOV
-    case 9:  // STR
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        stop_execution = true;
+        valid = false;
+    }
+        break;
+    case 9: // STR
     case 10: // LDR
     case 11: // STB
     case 12: // LDB
+        if ((operand_1 < 0 || operand_1 > 15) || (operand_2 < 0 || operand_2 > memory_size)) {
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+            stop_execution = true;
+            valid = false;
+        }
+        break;
     case 13: // ADD
     case 15: // SUB
     case 16: // MUL
     case 17: // DIV
-    case 21: // TRP
-        return true;
-    default:
-        return false;
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        stop_execution = true;
+        valid = false;
     }
+        break;
+    case 21: // TRP
+        if (!(operand_1 == 0 || operand_1 == 1 || operand_1 == 2 || operand_1 == 3 || operand_1 == 4 || operand_1 == 98)) {
+            valid = false;
+        }
+        break;
+    default:
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        valid = false;
+        break;
+    }
+
+    stop_execution = !valid;
+    return valid;
 }
+
+
 
 void execute() {
     // Extract the operation and operands
@@ -71,11 +111,11 @@ void execute() {
         break;
     case 9: // STR
         // Store integer in RS at Address
-        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
+        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
         break;
     case 10: // LDR
         // Load integer at address operand_2 to operand_1
-        reg_file[operand_1] = static_cast<unsigned int>(prog_mem[operand_2]);
+        reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
         break;
     case 11: //STB
         // Store least significant byte in RS at Address
@@ -128,22 +168,23 @@ void execute() {
         case 98:
             // Print all registers to console
             for (int i = 0; i < 16; ++i) {
-                cout << "R" << i << "   " << reg_file[i] << endl;
+                cout << "R" << i << "\t" << reg_file[i] << endl;
             }
-            cout << "PC: " << reg_file[PC] << endl;
-            cout << "SL: " << reg_file[SL] << endl;
-            cout << "SB: " << reg_file[SB] << endl;
-            cout << "SP: " << reg_file[SP] << endl;
-            cout << "FP: " << reg_file[FP] << endl;
-            cout << "HP: " << reg_file[HP] << endl;
+            cout << "PC\t" << reg_file[PC] << endl;
+            cout << "SL\t" << reg_file[SL] << endl;
+            cout << "SB\t" << reg_file[SB] << endl;
+            cout << "SP\t" << reg_file[SP] << endl;
+            cout << "FP\t" << reg_file[FP] << endl;
+            cout << "HP\t" << reg_file[HP] << endl;
             break;
         default:
-            cerr << "Invalid TRP instruction: " << operand_1 << endl;
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             break;
         }
         break;
     default:
-        cerr << "Invalid instruction: " << operation << endl;
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+        stop_execution = true;
         break;
     }
 }

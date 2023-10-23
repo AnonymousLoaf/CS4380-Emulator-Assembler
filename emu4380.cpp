@@ -80,6 +80,7 @@ bool decode() {
         }
         break;
     default:
+        cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         valid = false;
         break;
     }

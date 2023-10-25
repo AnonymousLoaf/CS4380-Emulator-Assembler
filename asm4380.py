@@ -206,7 +206,7 @@ def main():
     asm_file = sys.argv[1]
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
-        return -1
+        exit(1)
     else:
         bin_file = asm_file.replace('.asm', '.bin')
 
@@ -219,7 +219,7 @@ def main():
     #Check if main exists
     if 'MAIN' not in code_labels:
         print("Error. MAIN label not found")
-        return -1
+        exit(1)
     
     second_pass(instructions)
 if __name__ == "__main__":

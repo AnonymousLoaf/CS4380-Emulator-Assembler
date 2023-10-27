@@ -142,3 +142,94 @@ TEST(EmulatorTest, LDBInstruction) {
     // Does R1 contain the least significant byte?
     ASSERT_EQ(reg_file[1], 42);
 }
+
+TEST(EmulatorTest, ADDInstruction) {
+    // R0 = 42
+    reg_file[0] = 42;
+    // R1 = 10
+    reg_file[1] = 10;
+    // ADD R0, R1, R2
+    prog_mem[0] = 13;
+    prog_mem[4] = 0;
+    prog_mem[8] = 1;
+
+    // Simulate main
+    fetch();
+    bool valid = decode();
+    execute();
+
+    // Does R0 contain the sum of R0 and R1?
+    ASSERT_EQ(reg_file[0], 52);
+}
+
+TEST(EmulatorTest, SUBInstruction) {
+    // R0 = 42
+    reg_file[0] = 42;
+    // R1 = 10
+    reg_file[1] = 10;
+    // SUB R0, R1, R2
+    prog_mem[0] = 15;
+    prog_mem[4] = 0;
+    prog_mem[8] = 1;
+
+    // Simulate main
+    fetch();
+    bool valid = decode();
+    execute();
+
+    // Does R0 contain the difference of R0 and R1?
+    ASSERT_EQ(reg_file[0], 32);
+}
+
+TEST(EmulatorTest, MULInstruction) {
+    // R0 = 42
+    reg_file[0] = 42;
+    // R1 = 10
+    reg_file[1] = 10;
+    // MUL R0, R1, R2
+    prog_mem[0] = 16;
+    prog_mem[4] = 0;
+    prog_mem[8] = 1;
+
+    // Simulate main
+    fetch();
+    bool valid = decode();
+    execute();
+
+    // Does R0 contain the product of R0 and R1?
+    ASSERT_EQ(reg_file[0], 420);
+}
+
+TEST(EmulatorTest, DIVInstruction) {
+    // R0 = 42
+    reg_file[0] = 42;
+    // R1 = 10
+    reg_file[1] = 10;
+    // DIV R0, R1, R2
+    prog_mem[0] = 17;
+    prog_mem[4] = 0;
+    prog_mem[8] = 1;
+
+    // Simulate main
+    fetch();
+    bool valid = decode();
+    execute();
+
+    // Does R0 contain the quotient of R0 and R1?
+    ASSERT_EQ(reg_file[0], 4);
+}
+
+TEST(EmulatorTest, TRPInstruction) {
+    reg_file[0] = 0;
+    reg_file[1] = 1;
+    reg_file[2] = 2;
+    reg_file[3] = 3;
+    reg_file[4] = 4;
+    reg_file[5] = 5;
+    reg_file[6] = 6;
+    reg_file[7] = 7;
+
+    prog_mem[0] = 21;
+    prog_mem[4] = 1;
+    prog_mem[8] = 0;
+}

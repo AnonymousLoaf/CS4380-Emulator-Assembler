@@ -4,8 +4,26 @@ INSTRUCTION_MAP = {
     'JMP': { 
         'opcode': (1).to_bytes(4, "little", signed=False),
         'operands': 1 },
+    'JMR': {
+        'opcode': (2).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'BNZ': {
+        'opcode': (3).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'BGT': {
+        'opcode': (4).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'BLT': {
+        'opcode': (5).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'BRZ': {
+        'opcode': (6).to_bytes(4, "little", signed=False),
+        'operands': 2 },
     'MOV': { 
         'opcode': (7).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'LDA': {
+        'opcode': (8).to_bytes(4, "little", signed=False),
         'operands': 2 },
     'STR': { 
         'opcode': (9).to_bytes(4, "little", signed=False),
@@ -31,9 +49,30 @@ INSTRUCTION_MAP = {
     'DIV': { 
         'opcode': (17).to_bytes(4, "little", signed=False),
         'operands': 2 },
+    'CMP': {
+        'opcode': (20).to_bytes(4, "little", signed=False),
+        'operands': 2 },
     'TRP': { 
         'opcode': (21).to_bytes(4, "little", signed=False),
         'operands': 1 },
+    'ISTR': {
+        'opcode': (22).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ILDR': {
+        'opcode': (23).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ISTB': {
+        'opcode': (24).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ILDB': {
+        'opcode': (25).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'MOVI': {
+        'opcode': (31).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'CMPI': {
+        'opcode': (32).to_bytes(4, "little", signed=False),
+        'operands': 2 },
 }
 
 DIRECTIVE_MAP = {
@@ -176,13 +215,37 @@ def process_code_instruction(instruction):
                     bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little")
                 bytecode += filler
                 write_to_file(bytecode)
-                
-            if operator == 'TRP':
+            elif operator == 'JMR':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
                 bytecode += filler
                 write_to_file(bytecode)
+            # Branch instructions
+            elif operator in ['BNZ', 'BGT', 'BLT', 'BRZ']:
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                if operands[1] in code_labels:
+                    bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
+                else:
+                    print(f'Error. Invalid label {operands[1]}')
+                    exit(1)
+                write_to_file(bytecode)
+            # TRP Instruction
 
+            # Instruction wehre Operand_2 is a label
+            elif operator == 'LDA':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                if operands[1] in code_labels:
+                    bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
+                elif operands[1] in data_labels:
+                    bytecode += data_labels[operands[1]].to_bytes(4, "little", signed=False)
+                else:
+                    print(f'Error. Invalid label {operands[1]}')
+                    exit(1)
+                write_to_file(bytecode)
+            
+            # Operations where Operand 1 is a register and Operand 2 is a register or a label
             elif operator in ['MOV', 'STR', 'LDR', 'STB', 'LDB', 'ADD', 'SUB', 'MUL', 'DIV']:
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
@@ -195,6 +258,49 @@ def process_code_instruction(instruction):
                 else:
                     bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
+            
+            # CMP Instruction
+            elif operator == 'CMP':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[1]].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+
+            # TRP Instruction
+            elif operator == 'TRP':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += int(operands[0].replace('#', '')).to_bytes(4, "little", signed=False)
+                bytecode += filler
+                write_to_file(bytecode)
+
+            # I instructions
+            elif operator in ['ISTR', 'ILDR', 'ISTB', 'ILDB']:
+                operand1 = operands[0].strip().split()
+                operand2 = operands[1].strip().split()
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                if operand1[0] not in REGISTER_MAP or operand2[0] not in REGISTER_MAP:
+                    print(f'Error. Invalid register {operand1[0]}')
+                    exit(1)
+                else:
+                    bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
+                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+
+            # MOVI Instruction
+            elif operator == 'MOVI':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+
+            # CMPI Instruction
+            elif operator == 'CMPI':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+            
+            
 
 def write_to_file(binary_instruction: bytes):
     global bin_file

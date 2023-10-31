@@ -49,12 +49,30 @@ bool decode() {
             valid = false;
         }
         break;
+    case 2: // JMR
+        if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 3: // BNZ
+    case 4: // BGT
+    case 5: // BLT
+    case 6: // BRZ
+        if ((operand_1 < 0 || operand_1 > 15) || (operand_2 >= memory_size || operand_2 < 0)) {
+            valid = false;
+        }
+        break;
     case 7:  // MOV
         if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         stop_execution = true;
         valid = false;
     }
+        break;
+    case 8: // LDA
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+            valid = false;
+        }
         break;
     case 9: // STR
     case 10: // LDR
@@ -76,8 +94,26 @@ bool decode() {
         valid = false;
     }
         break;
+    case 20: //CMP
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+            valid = false;
+        }
+        break;
     case 21: // TRP
         if (!(operand_1 == 0 || operand_1 == 1 || operand_1 == 2 || operand_1 == 3 || operand_1 == 4 || operand_1 == 98)) {
+            valid = false;
+        }
+        break;
+    case 22: // ISTR
+    case 23: // ILDR
+    case 24: // ISTB
+    case 25: // ILDB
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+            valid = false;
+        }
+        break;
+    case 32: // CMPI
+        if (operand_1 < 0 || operand_1 > 15) {
             valid = false;
         }
         break;
@@ -105,9 +141,41 @@ void execute() {
         // Jump to address - move the PC to operand_1
         reg_file[PC] = operand_1;
         break;
+    case 2: // JMR
+        // Update PC to value in operand_1
+        reg_file[PC] = reg_file[operand_1];
+        break;
+    case 3: // BNZ
+        // Update PC to Address if RS != 0
+        if (reg_file[operand_1] != 0) {
+            reg_file[PC] = operand_2;
+        }
+        break;
+    case 4: // BGT
+        // Update PC to Address if RS > 0
+        if (reg_file[operand_1] > 0) {
+            reg_file[PC] = operand_2;
+        }
+        break;
+    case 5: // BLT
+        // Update PC to Address if RS < 0
+        if (reg_file[operand_1] < 0) {
+            reg_file[PC] = operand_2;
+        }
+        break;
+    case 6: // BRZ
+        // Update PC to Address if RS == 0
+        if (reg_file[operand_1] == 0) {
+            reg_file[PC] = operand_2;
+        }
+        break;
     case 7: // MOV
         // Move contents of operand_2 to operand_1
         reg_file[operand_1] = reg_file[operand_2];
+        break;
+    case 8: // LDA
+        // Load address operand_2 to operand_1
+        reg_file[operand_1] = operand_2;
         break;
     case 9: // STR
         // Store integer in RS at Address
@@ -143,6 +211,18 @@ void execute() {
         }
         else {
             cerr << "Cannot divide by 0!" << endl;
+        }
+        break;
+    case 20: // CMP
+        // Compare operand_1 and operand_2 and set flags
+        if (reg_file[operand_1] == reg_file[operand_2]) {
+            reg_file[operand_1] = 0;
+        }
+        else if (reg_file[operand_1] > reg_file[operand_2]) {
+            reg_file[operand_1] = 1;
+        }
+        else {
+            reg_file[operand_1] = -1;
         }
         break;
     case 21:
@@ -184,6 +264,38 @@ void execute() {
         default:
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             break;
+        }
+        break;
+    case 22: // ISTR
+        // Store integer in RS at Address
+        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
+        break;
+    case 23: // ILDR
+        // Load integer at address operand_2 to operand_1
+        reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
+        break;
+    case 24: // ISTB
+        // Store byte in operand_1 and address operand_2
+        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
+        break;
+    case 25: // ILDB
+        // Load byte at address operand_2 to operand_1
+        reg_file[operand_1] = prog_mem[operand_2];
+        break;
+    case 31: //MOVI
+        // Move operand_2 to operand_1
+        reg_file[operand_1] = operand_2;
+        break;
+    case 32: // CMPI
+        // Compare operand_1 and operand_2 and set flags
+        if (reg_file[operand_1] == operand_2) {
+            reg_file[operand_1] = 0;
+        }
+        else if (reg_file[operand_1] > operand_2) {
+            reg_file[operand_1] = 1;
+        }
+        else {
+            reg_file[operand_1] = -1;
         }
         break;
     default:

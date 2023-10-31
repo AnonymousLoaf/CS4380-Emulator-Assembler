@@ -8,6 +8,27 @@ unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
 bool stop_execution = false;
+unsigned int mem_cycle_cntr = 0;
+
+unsigned char readByte(unsigned int address) {
+    mem_cycle_cntr += 8;
+    return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
+}
+
+unsigned int readWord(unsigned int address) {
+    mem_cycle_cntr += 8;
+    return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
+}
+
+void writeByte(unsigned int address, unsigned char byte) {
+    mem_cycle_cntr += 8;
+    prog_mem[address] = byte;
+}
+
+void writeWord(unsigned int address, unsigned int word) {
+    mem_cycle_cntr += 8;
+    *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
+}
 
 
 void fetch() {

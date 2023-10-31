@@ -9,8 +9,10 @@ void execute();
 
 // Externs
 extern unsigned int reg_file[];
-extern unsigned char prog_mem[];
 extern unsigned int cntrl_regs[];
+extern unsigned int mem_cycle_cntr;
+extern unsigned char prog_mem[];
+
 extern bool stop_execution;
 
 // Enums
@@ -22,5 +24,10 @@ enum RegNames {
 enum CntrlRegNames {
     OPERATION = 0, OPERAND_1, OPERAND_2
 };
+
+unsigned char readByte(unsigned int address);
+unsigned int readWord(unsigned int address);
+void writeByte(unsigned int address, unsigned char byte);
+void writeWord(unsigned int address, unsigned int word);
 
 #endif

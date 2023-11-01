@@ -33,8 +33,9 @@ void writeWord(unsigned int address, unsigned int word) {
 
 void fetch() {
     // Read the instruction
-    uint32_t* instruction_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    unsigned int operation = *instruction_ptr;
+    // uint32_t* instruction_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    // unsigned int operation = *instruction_ptr;
+    unsigned int operation = readWord(prog_mem[reg_file[PC]]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
     uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);

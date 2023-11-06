@@ -146,15 +146,24 @@ def process_data_instruction(instruction):
         write_to_file(data)
 
     elif data_type == '.BYT':
-        if "'" not in data:
-            data = data.encode('utf-8')
+        if data == 0:
+            data = data.to_bytes(1, "little", signed=False)
+            write_to_file(data)
+        elif "'" not in data:
+            data = data.replace('#', '')
+            data = int(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
         elif '\\n' in data:
             data = data.replace('\\n', '\n')
-            data = data[1].encode('utf-8')
+            data = ord(data[1]).to_bytes(1, "little", signed=False)
             write_to_file(data)
         else:
-            data = data[1].encode('utf-8')
+            data = data.replace("'", '')
+            if '#' in data and len(data) > 1:
+                data = data.replace('#', '')
+                data = int(data)
+                data = chr(data)
+            data = ord(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
 
     else:

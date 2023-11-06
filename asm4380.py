@@ -146,7 +146,6 @@ def process_data_instruction(instruction):
         write_to_file(data)
 
     elif data_type == '.BYT':
-        print(f'data: {data}')
         if "'" not in data:
             data = data.encode('utf-8')
             write_to_file(data)

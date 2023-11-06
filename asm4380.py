@@ -64,7 +64,9 @@ def remove_comments(line):
     :return: The line without comments
     """
     # Remove comments from the line
-    if ";" in line:
+    if "';'" in line:
+        return line
+    elif ";" in line:
         line = line.split(";", 1)[0].strip()
     return line
 
@@ -87,7 +89,8 @@ def first_pass(asm_file):
             if line_elements and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
                 label = line_elements[0]
                 if label[0] == '_':
-                    raise Exception(f"Error on line {line_num + 1} Invalid label {label}")
+                    print(f"Error on line {line_num + 1} Invalid label {label}")
+                    exit(1)
                 line_elements = line_elements[1:]
                 check_upper = line_elements[0].upper()
                 if check_upper in DIRECTIVE_MAP:
@@ -122,7 +125,7 @@ def second_pass(instructions):
             continue
         if instruction[0].upper() in DIRECTIVE_MAP and in_code_section:
             print(f"Error on line {line_num + 1} Directive found after code section")
-            return -1
+            exit(1)
         elif instruction[0].upper() in DIRECTIVE_MAP and not in_code_section:
             process_data_instruction(instruction)
             line_num += 1
@@ -131,7 +134,8 @@ def second_pass(instructions):
             process_code_instruction(instruction)
             line_num += 1
         else:
-            print(f"Error on line {line_num + 1} Unknown instruction {instruction[0]}")
+            print(f"Error on line {line_num + 1}")
+            exit(1)
 
 def process_data_instruction(instruction):
     data_type = instruction[0]
@@ -142,31 +146,33 @@ def process_data_instruction(instruction):
         write_to_file(data)
 
     elif data_type == '.BYT':
+        print(f'data: {data}')
         if "'" not in data:
-            data = ascii(data).to_bytes(1, "little", signed=False)
+            data = data.encode('utf-8')
             write_to_file(data)
         elif '\\n' in data:
             data = data.replace('\\n', '\n')
-            data = ord(data[1]).to_bytes(1, "little", signed=False)
+            data = data[1].encode('utf-8')
             write_to_file(data)
         else:
-            data = ord(data[1]).to_bytes(1, "little", signed=False)
+            data = data[1].encode('utf-8')
             write_to_file(data)
 
     else:
         print(f'Error. Unknown data type {data_type}')
-        return -1
+        exit(1)
 
 def process_code_instruction(instruction):
     if instruction[0] not in INSTRUCTION_MAP:
         print(f'Error. Unknown instruction {instruction[0]}')
-        return -1
+        exit(1)
     else:
         operator = instruction.pop(0)
         num_operands = INSTRUCTION_MAP[operator]['operands']
         operands = ('').join(instruction).split(',')
         if len(instruction) < num_operands:
             print(f'Error. Invalid number of operands for instruction {instruction[0]}')
+            exit(1)
         else:
             if operator == 'JMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
@@ -206,7 +212,7 @@ def main():
     asm_file = sys.argv[1]
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
-        return -1
+        exit(1)
     else:
         bin_file = asm_file.replace('.asm', '.bin')
 
@@ -219,7 +225,7 @@ def main():
     #Check if main exists
     if 'MAIN' not in code_labels:
         print("Error. MAIN label not found")
-        return -1
+        exit(1)
     
     second_pass(instructions)
 if __name__ == "__main__":

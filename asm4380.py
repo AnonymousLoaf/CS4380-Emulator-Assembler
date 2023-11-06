@@ -89,8 +89,8 @@ def first_pass(asm_file):
             if line_elements and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
                 label = line_elements[0]
                 if label[0] == '_':
-                    print(f"Error on line {line_num + 1} Invalid label {label}")
-                    exit(1)
+                    print(f"Assembler error encountered on line {line_num}!")
+                    exit(2)
                 line_elements = line_elements[1:]
                 check_upper = line_elements[0].upper()
                 if check_upper in DIRECTIVE_MAP:
@@ -117,27 +117,28 @@ def first_pass(asm_file):
     write_to_file(data)
 
 def second_pass(instructions):
-    line_num = 0
+    line_num = 1
     in_code_section = False
     for instruction in instructions:
         if not instruction:
             line_num += 1
             continue
         if instruction[0].upper() in DIRECTIVE_MAP and in_code_section:
-            print(f"Error on line {line_num + 1} Directive found after code section")
-            exit(1)
+            print(f"Assembler error encountered on line {line_num}!")
+            #print(f'Data segment found after code segment')
+            exit(2)
         elif instruction[0].upper() in DIRECTIVE_MAP and not in_code_section:
-            process_data_instruction(instruction)
+            process_data_instruction(instruction, line_num)
             line_num += 1
         elif instruction[0].upper() in INSTRUCTION_MAP:
             in_code_section = True
-            process_code_instruction(instruction)
+            process_code_instruction(instruction, line_num)
             line_num += 1
         else:
-            print(f"Error on line {line_num + 1}")
-            exit(1)
+            print(f"Assembler error encountered on line {line_num}!")
+            exit(2)
 
-def process_data_instruction(instruction):
+def process_data_instruction(instruction, line_num):
     data_type = instruction[0]
     data_type = data_type.upper()
     data = instruction[1] if len(instruction) > 1 else 0
@@ -151,6 +152,10 @@ def process_data_instruction(instruction):
             write_to_file(data)
         elif "'" not in data:
             data = data.replace('#', '')
+            if int(data) > 255 or int(data) < 0:
+                print(f'Assembler error encountered on line {line_num}!')
+                #print(f'Byte value out of range')
+                exit(2)
             data = int(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
         elif '\\n' in data:
@@ -165,22 +170,23 @@ def process_data_instruction(instruction):
                 data = chr(data)
             data = ord(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
-
     else:
-        print(f'Error. Unknown data type {data_type}')
-        exit(1)
+        print(f"Assembler error encountered on line {line_num}!")
+        exit(2)
 
-def process_code_instruction(instruction):
+def process_code_instruction(instruction, line_num):
     if instruction[0] not in INSTRUCTION_MAP:
-        print(f'Error. Unknown instruction {instruction[0]}')
-        exit(1)
+        print(f"Assembler error encountered on line {line_num}!")
+        #print(f'Invalid instruction')
+        exit(2)
     else:
         operator = instruction.pop(0)
         num_operands = INSTRUCTION_MAP[operator]['operands']
         operands = ('').join(instruction).split(',')
         if len(instruction) < num_operands:
-            print(f'Error. Invalid number of operands for instruction {instruction[0]}')
-            exit(1)
+            print(f"Assembler error encountered on line {line_num}!")
+            #print(f'Not enough operands for {operator}')
+            exit(2)
         else:
             if operator == 'JMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
@@ -233,8 +239,9 @@ def main():
     #Check if main exists
     if 'MAIN' not in code_labels:
         print("Error. MAIN label not found")
-        exit(1)
+        exit(2)
     
     second_pass(instructions)
+    exit(0)
 if __name__ == "__main__":
     main()

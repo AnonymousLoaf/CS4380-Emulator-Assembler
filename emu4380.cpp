@@ -163,8 +163,12 @@ void execute() {
             cout << static_cast<char>(reg_file[3]);
             break;
         case 4:
-            // Read a char into R3 from stdin
-            cin >> reg_file[3];
+            // Read a charater into R3 from stdin
+            char input;
+            cin.ignore();
+            cin.get(input);
+            reg_file[3] = static_cast<unsigned int>(input);
+            break;
         case 98:
             // Print all registers to console
             for (int i = 0; i < 16; ++i) {

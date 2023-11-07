@@ -38,13 +38,14 @@ INSTRUCTION_MAP = {
 
 DIRECTIVE_MAP = {
     '.INT': (0).to_bytes(4, "little", signed=True),
-    '.BYT': (1).to_bytes(4, "little", signed=False),
+    '.BYT': (0).to_bytes(1, "little", signed=False),
 }
 
 REGISTER_MAP = {
     'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
     'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
-    'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15,
+    'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15, 'PC': 16, 'SL': 17,
+    'SB': 18, 'SP': 19, 'FP': 20, 'HP': 21
 }
 
 filler = (0).to_bytes(4, "little", signed=False)
@@ -64,9 +65,7 @@ def remove_comments(line):
     :return: The line without comments
     """
     # Remove comments from the line
-    if "';'" in line:
-        return line
-    elif ";" in line:
+    if ";" in line:
         line = line.split(";", 1)[0].strip()
     return line
 
@@ -76,14 +75,16 @@ def first_pass(asm_file):
         line_num = 1
 
         for line in f:
+            line = line.replace("' '", 'temp_space')
+            line = line.replace("';'", 'temp_semicolon')
             line = remove_comments(line)
-            line_elements = line.strip()
-            line_elements = line_elements.replace("' '", 'temp_space')
-            line_elements = line_elements.split()
-            #Put the space back in
+            line_elements = line.strip().split()
+            #Put the space and ; back in
             for idx in range(len(line_elements)):
                 if line_elements[idx] == 'temp_space':
                     line_elements[idx] = "' '"
+                elif line_elements[idx] == 'temp_semicolon':
+                    line_elements[idx] = "';'"
             if len(line_elements) > 0:
                 check_upper = line_elements[0].upper()
             if line_elements and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
@@ -143,7 +144,9 @@ def process_data_instruction(instruction, line_num):
     data_type = data_type.upper()
     data = instruction[1] if len(instruction) > 1 else 0
     if data_type == '.INT':
-        data = int(data.replace('#', '')).to_bytes(4, "little", signed=True)
+        if isinstance(data, str):
+            data = data.replace('#', '')
+        data = int(data).to_bytes(4, "little", signed=True)
         write_to_file(data)
 
     elif data_type == '.BYT':
@@ -212,8 +215,14 @@ def process_code_instruction(instruction, line_num):
                     bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
                 elif operand2[0] in data_labels:
                     bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
-                else:
+                elif operand2[0] in REGISTER_MAP:
                     bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                elif operand2[0].startswith('#'):
+                    bytecode += int(operand2[0].replace('#', '')).to_bytes(4, "little", signed=True)
+                else:
+                    print(f"Assembler error encountered on line {line_num}!")
+                    #print(f'Invalid operand {operand2[0]}')
+                    exit(2)
                 write_to_file(bytecode)
 
 def write_to_file(binary_instruction: bytes):

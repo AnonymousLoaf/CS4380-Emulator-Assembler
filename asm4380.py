@@ -166,8 +166,9 @@ def process_data_instruction(instruction, line_num):
             data = ord(data[1]).to_bytes(1, "little", signed=False)
             write_to_file(data)
         else:
-            print(f'Assembler error encountered on line {line_num}!')
-            exit(2)
+            data = data.replace("'", '')
+            data = ord(data).to_bytes(1, "little", signed=False)
+            write_to_file(data)
     else:
         print(f"Assembler error encountered on line {line_num}!")
         exit(2)

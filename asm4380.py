@@ -227,10 +227,6 @@ def process_code_instruction(instruction, line_num):
                     #print(f'Invalid operand {operand2[0]}')
                     exit(2)
                 write_to_file(bytecode)
-            else:
-                print(f"Assembler error encountered on line {line_num + 1}!")
-                #print(f'Invalid instruction')
-                exit(2)
 
 
             """elif operator in ['ADD', 'SUB', 'MUL', 'DIV']:

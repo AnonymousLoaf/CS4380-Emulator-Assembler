@@ -235,6 +235,9 @@ def main():
     else:
         bin_file = asm_file.replace('.asm', '.bin')
 
+    with open(bin_file, 'wb') as f:
+        pass
+    
     first_pass(asm_file)
 
     #print(f'Code labels: {code_labels}')

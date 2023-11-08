@@ -1,8 +1,6 @@
-ONE  .BYT #1
-TWO  .BYT #2
-A    .BYT 'A'
-     JMP MAIN
+  .INT  #251
+  .BYT  'B'
+TWO .INT  #2
+   JMP MAIN
 
-MAIN LDB R3, ONE
-     TRP #3
-     TRP #0
+MAIN ADD R3, #4

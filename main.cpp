@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     if (argc != 2) {
         cerr << "Usage: " << argv[0] << " <file_path>" << endl;
-        return 1;
+        exit(1);
     }
     
     string fileName = argv[1];
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     binFile.open(fileName, ios::binary);
     if (!binFile.is_open()) {
         cerr << "ERROR! Could not OPEN the given file" << endl;
-        return 1;
+        exit(1);
     }
 
     // Get the file size
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     if (fileSize > maxFileSize) {
         cerr << "ERROR! File size exceeds the maximum limit of " << maxFileSize << " bytes." << endl;
         binFile.close();
-        return 1;
+        exit(1);
     }
 
     // Read the file into prog_mem
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     if (!binFile.good()) {
         cerr << "ERROR! Could not READ the given file" << endl;
         binFile.close();
-        return 1;
+        exit(1);
     }
 
     binFile.close();
@@ -56,12 +56,12 @@ int main(int argc, char* argv[]) {
         // Decode instruction - check validity
         if (!decode()) {
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
-            return 1;
+            exit(1);
         }
 
         // Execute instruction
         execute();
     }
 
-    return 0;
+    exit(0);
 }

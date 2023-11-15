@@ -77,13 +77,14 @@ INSTRUCTION_MAP = {
 
 DIRECTIVE_MAP = {
     '.INT': (0).to_bytes(4, "little", signed=True),
-    '.BYT': (1).to_bytes(4, "little", signed=False),
+    '.BYT': (0).to_bytes(1, "little", signed=False),
 }
 
 REGISTER_MAP = {
     'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
     'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9, 'R10': 10, 'R11': 11,
-    'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15,
+    'R12': 12, 'R13': 13, 'R14': 14, 'R15': 15, 'PC': 16, 'SL': 17,
+    'SB': 18, 'SP': 19, 'FP': 20, 'HP': 21
 }
 
 filler = (0).to_bytes(4, "little", signed=False)
@@ -113,20 +114,32 @@ def first_pass(asm_file):
         line_num = 1
 
         for line in f:
+            line = line.replace("' '", 'temp_space')
+            line = line.replace("';'", 'temp_semicolon')
             line = remove_comments(line)
-            line_elements = line.strip()
-            line_elements = line_elements.replace("' '", 'temp_space')
-            line_elements = line_elements.split()
-            #Put the space back in
+            line_elements = line.strip().split()
+            #Put the space and ; back in
             for idx in range(len(line_elements)):
                 if line_elements[idx] == 'temp_space':
                     line_elements[idx] = "' '"
+                elif line_elements[idx] == 'temp_semicolon':
+                    line_elements[idx] = "';'"
             if len(line_elements) > 0:
                 check_upper = line_elements[0].upper()
-            if line_elements and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
+            else:
+                check_upper = ''
+            #Handle directive with no label
+            if check_upper in DIRECTIVE_MAP:
+                num_bytes = 4 if check_upper == '.INT' else 1
+                num_data_bytes += num_bytes
+                bytes_from_start += num_bytes
+                instructions.append(line_elements)
+            #Handle directive with label
+            elif (len(line_elements) > 0) and check_upper not in DIRECTIVE_MAP and check_upper not in INSTRUCTION_MAP:
                 label = line_elements[0]
                 if label[0] == '_':
-                    raise Exception(f"Error on line {line_num + 1} Invalid label {label}")
+                    print(f"Assembler error encountered on line {line_num}!")
+                    exit(2)
                 line_elements = line_elements[1:]
                 check_upper = line_elements[0].upper()
                 if check_upper in DIRECTIVE_MAP:
@@ -139,12 +152,12 @@ def first_pass(asm_file):
                     num_bytes = 12
                     bytes_from_start += num_bytes
                 instructions.append(line_elements)
-            else:
+            elif check_upper in INSTRUCTION_MAP:
+                num_bytes = 12
+                bytes_from_start += num_bytes
                 instructions.append(line_elements)
-                if len(line_elements) > 0:
-                    num_bytes = 12
-                    bytes_from_start += num_bytes
-
+            else:
+                pass
             line_num += 1
 
     # Write location of first instruction to file
@@ -153,59 +166,74 @@ def first_pass(asm_file):
     write_to_file(data)
 
 def second_pass(instructions):
-    line_num = 0
+    line_num = 1
     in_code_section = False
     for instruction in instructions:
         if not instruction:
             line_num += 1
             continue
         if instruction[0].upper() in DIRECTIVE_MAP and in_code_section:
-            print(f"Error on line {line_num + 1} Directive found after code section")
-            return -1
+            print(f"Assembler error encountered on line {line_num}!")
+            #print(f'Data segment found after code segment')
+            exit(2)
         elif instruction[0].upper() in DIRECTIVE_MAP and not in_code_section:
-            process_data_instruction(instruction)
+            process_data_instruction(instruction, line_num)
             line_num += 1
         elif instruction[0].upper() in INSTRUCTION_MAP:
             in_code_section = True
-            process_code_instruction(instruction)
+            process_code_instruction(instruction, line_num)
             line_num += 1
         else:
-            print(f"Error on line {line_num + 1} Unknown instruction {instruction[0]}")
+            print(f"Assembler error encountered on line {line_num}!")
+            exit(2)
 
-def process_data_instruction(instruction):
+def process_data_instruction(instruction, line_num):
     data_type = instruction[0]
     data_type = data_type.upper()
     data = instruction[1] if len(instruction) > 1 else 0
     if data_type == '.INT':
-        data = int(data.replace('#', '')).to_bytes(4, "little", signed=True)
+        if isinstance(data, str):
+            data = data.replace('#', '')
+        data = int(data).to_bytes(4, "little", signed=True)
         write_to_file(data)
 
     elif data_type == '.BYT':
-        if "'" not in data:
-            data = ascii(data).to_bytes(1, "little", signed=False)
+        if data == 0:
+            data = data.to_bytes(1, "little", signed=False)
+            write_to_file(data)
+        elif "'" not in data:
+            data = data.replace('#', '')
+            if int(data) > 255 or int(data) < 0:
+                print(f'Assembler error encountered on line {line_num}!')
+                #print(f'Byte value out of range')
+                exit(2)
+            data = int(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
         elif '\\n' in data:
             data = data.replace('\\n', '\n')
             data = ord(data[1]).to_bytes(1, "little", signed=False)
             write_to_file(data)
         else:
-            data = ord(data[1]).to_bytes(1, "little", signed=False)
+            data = data.replace("'", '')
+            data = ord(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
-
     else:
-        print(f'Error. Unknown data type {data_type}')
-        return -1
+        print(f"Assembler error encountered on line {line_num}!")
+        exit(2)
 
-def process_code_instruction(instruction):
+def process_code_instruction(instruction, line_num):
     if instruction[0] not in INSTRUCTION_MAP:
-        print(f'Error. Unknown instruction {instruction[0]}')
-        return -1
+        print(f"Assembler error encountered on line {line_num + 1}!")
+        #print(f'Invalid instruction')
+        exit(2)
     else:
         operator = instruction.pop(0)
         num_operands = INSTRUCTION_MAP[operator]['operands']
         operands = ('').join(instruction).split(',')
         if len(instruction) < num_operands:
-            print(f'Error. Invalid number of operands for instruction {instruction[0]}')
+            print(f"Assembler error encountered on line {line_num + 1}!")
+            #print(f'Not enough operands for {operator}')
+            exit(2)
         else:
             if operator == 'JMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
@@ -255,8 +283,12 @@ def process_code_instruction(instruction):
                     bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
                 elif operand2[0] in data_labels:
                     bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
-                else:
+                elif operand2[0] in REGISTER_MAP:
                     bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                else:
+                    print(f"Assembler error encountered on line {line_num + 1}!")
+                    #print(f'Invalid operand {operand2[0]}')
+                    exit(2)
                 write_to_file(bytecode)
             
             # CMP Instruction
@@ -302,6 +334,27 @@ def process_code_instruction(instruction):
             
             
 
+
+            """elif operator in ['ADD', 'SUB', 'MUL', 'DIV']:
+                operand1 = operands[0].strip().split()
+                operand2 = operands[1].strip().split()
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
+                if operand2[0] in code_labels:
+                    bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
+                elif operand2[0] in data_labels:
+                    bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
+                elif operand2[0] in REGISTER_MAP:
+                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                elif operand2[0][0] == '#':
+                    bytecode += int(operand2[0].replace('#', '')).to_bytes(4, "little", signed=False)
+                else:
+                    print(f"Assembler error encountered on line {line_num + 1}!")
+                    #print(f'Invalid operand {operand2[0]}')
+                    exit(2)
+                write_to_file(bytecode)"""
+
+
 def write_to_file(binary_instruction: bytes):
     global bin_file
     with open(bin_file, 'ab') as f:
@@ -310,12 +363,16 @@ def write_to_file(binary_instruction: bytes):
 def main():
     global asm_file, bin_file
     asm_file = sys.argv[1]
+    #asm_file = 'CS4380\CS4380-Emulator-Assembler\hw.asm'
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)
     else:
         bin_file = asm_file.replace('.asm', '.bin')
 
+    with open(bin_file, 'wb') as f:
+        pass
+    
     first_pass(asm_file)
 
     #print(f'Code labels: {code_labels}')
@@ -325,8 +382,9 @@ def main():
     #Check if main exists
     if 'MAIN' not in code_labels:
         print("Error. MAIN label not found")
-        exit(1)
+        exit(2)
     
     second_pass(instructions)
+    exit(0)
 if __name__ == "__main__":
     main()

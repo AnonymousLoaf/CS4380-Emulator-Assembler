@@ -1,0 +1,6 @@
+  .INT  #251
+  .BYT  'B'
+TWO .INT  #2
+   JMP MAIN
+
+MAIN ADD R3, #4

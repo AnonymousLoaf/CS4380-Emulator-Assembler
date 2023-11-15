@@ -207,9 +207,6 @@ void execute() {
         // Load integer at address operand_2 to operand_1
         reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
         break;
-    case 11: //STB
-        // Store least significant byte in RS at Address
-        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
     case 12: // LDB
         // Load byte at address operand_2 to operand_1
         reg_file[operand_1] = prog_mem[operand_2];
@@ -266,10 +263,11 @@ void execute() {
             cout << static_cast<char>(reg_file[3]);
             break;
         case 4:
-            // Read a char into R3 from stdin
-            char input_char;
-            input_char = cin.get();
-            reg_file[3] = static_cast<unsigned int>(input_char);
+            // Read a charater into R3 from stdin
+            char input;
+            cin.ignore();
+            cin.get(input);
+            reg_file[3] = static_cast<unsigned int>(input);
             break;
         case 98:
             // Print all registers to console

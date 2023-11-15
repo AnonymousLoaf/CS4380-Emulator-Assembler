@@ -1,0 +1,24 @@
+EmulatorTest.JMPInstructionSetsPC 0 0
+EmulatorTest.ErrorHandlingForInvalidInstructions 6 0.0128197
+EmulatorTest.MOVInstruction 6 0.00963568
+EmulatorTest.STBInstruction 3 0.0227289
+EmulatorTest.DIVInstruction 0 0
+EmulatorTest.TRPInstructionStop 5 0.0150489
+EmulatorTest.TRPInstructionPrintRegisters 5 0.0128525
+EmulatorTest.InvalidInstructionOutOfRangeOperands 0 0
+EmulatorTest.ValidMOVInstruction 6 0.0188089
+EmulatorTest.InvalidMOVInstruction 6 0.00461098
+EmulatorTest.ValidSTRInstruction 5 0.00695095
+EmulatorTest.InvalidSTRInstruction 0 0
+EmulatorTest.ValidLDRInstruction 5 0.0130013
+EmulatorTest.InvalidLDRInstruction 0 0
+EmulatorTest.ValidJMPInstruction 2 0.086903
+EmulatorTest.ValidSTBInstruction 3 0.0275932
+EmulatorTest.ValidLDBInstruction 3 0.0183747
+EmulatorTest.JMPInstruction 4 0.019342
+EmulatorTest.STRInstruction 3 0.0276832
+EmulatorTest.LDRInstruction 3 0.019563
+EmulatorTest.LDBInstruction 3 0.0256739
+EmulatorTest.ADDInstruction 1 0.0737958
+EmulatorTest.SUBInstruction 1 0.093521
+---

@@ -1,0 +1,222 @@
+Start testing: Oct 27 07:12 MDT
+----------------------------------------------------------
+1/8 Testing: EmulatorTest.JMPInstruction
+1/8 Test: EmulatorTest.JMPInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.JMPInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.JMPInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.JMPInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.JMPInstruction
+INVALID INSTRUCTION AT: 112
+INVALID INSTRUCTION AT: 112
+[       OK ] EmulatorTest.JMPInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.JMPInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.JMPInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/8 Testing: EmulatorTest.MOVInstruction
+2/8 Test: EmulatorTest.MOVInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.MOVInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.MOVInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.MOVInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.MOVInstruction
+INVALID INSTRUCTION AT: 24
+[       OK ] EmulatorTest.MOVInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.MOVInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.MOVInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/8 Testing: EmulatorTest.STRInstruction
+3/8 Test: EmulatorTest.STRInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.STRInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.STRInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.STRInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.STRInstruction
+[       OK ] EmulatorTest.STRInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.STRInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.STRInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/8 Testing: EmulatorTest.LDRInstruction
+4/8 Test: EmulatorTest.LDRInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.LDRInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.LDRInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.LDRInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.LDRInstruction
+[       OK ] EmulatorTest.LDRInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.LDRInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.LDRInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/8 Testing: EmulatorTest.STBInstruction
+5/8 Test: EmulatorTest.STBInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.STBInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.STBInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.STBInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.STBInstruction
+[       OK ] EmulatorTest.STBInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.STBInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.STBInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/8 Testing: EmulatorTest.LDBInstruction
+6/8 Test: EmulatorTest.LDBInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.LDBInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.LDBInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.LDBInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.LDBInstruction
+[       OK ] EmulatorTest.LDBInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.LDBInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.LDBInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/8 Testing: EmulatorTest.ADDInstruction
+7/8 Test: EmulatorTest.ADDInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.ADDInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.ADDInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.ADDInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.ADDInstruction
+[       OK ] EmulatorTest.ADDInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.ADDInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.ADDInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/8 Testing: EmulatorTest.SUBInstruction
+8/8 Test: EmulatorTest.SUBInstruction
+Command: "/mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build/runTests" "--gtest_filter=EmulatorTest.SUBInstruction" "--gtest_also_run_disabled_tests"
+Directory: /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/Build
+"EmulatorTest.SUBInstruction" start time: Oct 27 07:12 MDT
+Output:
+----------------------------------------------------------
+Running main() from /mnt/c/Users/theda/Desktop/School Dev/CS4380/CS4380-Emulator-Assembler/build/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = EmulatorTest.SUBInstruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from EmulatorTest
+[ RUN      ] EmulatorTest.SUBInstruction
+[       OK ] EmulatorTest.SUBInstruction (0 ms)
+[----------] 1 test from EmulatorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"EmulatorTest.SUBInstruction" end time: Oct 27 07:12 MDT
+"EmulatorTest.SUBInstruction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 27 07:12 MDT

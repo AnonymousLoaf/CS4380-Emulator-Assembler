@@ -331,28 +331,6 @@ def process_code_instruction(instruction, line_num):
                 bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
                 bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
-            
-            
-
-
-            """elif operator in ['ADD', 'SUB', 'MUL', 'DIV']:
-                operand1 = operands[0].strip().split()
-                operand2 = operands[1].strip().split()
-                bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
-                if operand2[0] in code_labels:
-                    bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
-                elif operand2[0] in data_labels:
-                    bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
-                elif operand2[0] in REGISTER_MAP:
-                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
-                elif operand2[0][0] == '#':
-                    bytecode += int(operand2[0].replace('#', '')).to_bytes(4, "little", signed=False)
-                else:
-                    print(f"Assembler error encountered on line {line_num + 1}!")
-                    #print(f'Invalid operand {operand2[0]}')
-                    exit(2)
-                write_to_file(bytecode)"""
 
 
 def write_to_file(binary_instruction: bytes):

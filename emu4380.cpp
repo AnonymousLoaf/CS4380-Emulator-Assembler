@@ -38,12 +38,14 @@ void fetch() {
     unsigned int operation = readWord(prog_mem[reg_file[PC]]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
-    uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    unsigned int operand_1 = *operand_1_ptr;
+    // uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    // unsigned int operand_1 = *operand_1_ptr;
+    unsigned int operand_1 = readWord(prog_mem[reg_file[PC]]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
-    uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    unsigned int operand_2 = *operand_2_ptr;
+    // uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
+    // unsigned int operand_2 = *operand_2_ptr;
+    unsigned int operand_2 = readWord(prog_mem[reg_file[PC]]);
     reg_file[PC] += INSTRUCTION_SIZE;
     
     // Update control registers
@@ -131,6 +133,11 @@ bool decode() {
     case 24: // ISTB
     case 25: // ILDB
         if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+            valid = false;
+        }
+        break;
+    case 31: // MOVI
+        if (operand_1 < 0 || operand_1 > 15) {
             valid = false;
         }
         break;

@@ -5,7 +5,7 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
-extern bool stop_execution;
+extern unsigned int mem_cycle_cntr;
 
 int main(int argc, char* argv[]) {
     ifstream binFile;

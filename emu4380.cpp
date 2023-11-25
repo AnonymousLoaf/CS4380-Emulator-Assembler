@@ -255,6 +255,7 @@ void execute() {
         switch (operand_1) {
         case 0:
             // Executes the STOP/Exit routine
+            cout << "Execution completed. Total memory cycles: " << mem_cycle_cntr << "\n" << endl;
             stop_execution = true;
             break;
         case 1:

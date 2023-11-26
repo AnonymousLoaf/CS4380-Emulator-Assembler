@@ -35,17 +35,17 @@ void fetch() {
     // Read the instruction
     // uint32_t* instruction_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
     // unsigned int operation = *instruction_ptr;
-    unsigned int operation = readWord(prog_mem[reg_file[PC]]);
+    unsigned int operation = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
     // uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
     // unsigned int operand_1 = *operand_1_ptr;
-    unsigned int operand_1 = readWord(prog_mem[reg_file[PC]]);
+    unsigned int operand_1 = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
     // uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
     // unsigned int operand_2 = *operand_2_ptr;
-    unsigned int operand_2 = readWord(prog_mem[reg_file[PC]]);
+    unsigned int operand_2 = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
     
     // Update control registers
@@ -163,6 +163,9 @@ void execute() {
     unsigned int operation = cntrl_regs[OPERATION];
     unsigned int operand_1 = cntrl_regs[OPERAND_1];
     unsigned int operand_2 = cntrl_regs[OPERAND_2];
+    //cout << "Operation: " << operation << endl;
+    //cout << "Operand 1: " << operand_1 << endl;
+    //cout << "Operand 2: " << operand_2 << endl;
 
     // Switch statement to handle all Instructions
     switch (operation) {
@@ -185,11 +188,17 @@ void execute() {
         if (reg_file[operand_1] > 0) {
             reg_file[PC] = operand_2;
         }
+        else {
+            reg_file[PC] += INSTRUCTION_SIZE;
+        }
         break;
     case 5: // BLT
         // Update PC to Address if RS < 0
         if (reg_file[operand_1] < 0) {
             reg_file[PC] = operand_2;
+        }
+        else {
+            reg_file[PC] += INSTRUCTION_SIZE;
         }
         break;
     case 6: // BRZ
@@ -197,26 +206,29 @@ void execute() {
         if (reg_file[operand_1] == 0) {
             reg_file[PC] = operand_2;
         }
+        else {
+            reg_file[PC] += INSTRUCTION_SIZE;
+        }
         break;
     case 7: // MOV
         // Move contents of operand_2 to operand_1
         reg_file[operand_1] = reg_file[operand_2];
         break;
     case 8: // LDA
-        // Load address operand_2 to operand_1
+        // Load address operand_2 to operand_1 using readWord
         reg_file[operand_1] = operand_2;
         break;
     case 9: // STR
-        // Store integer in RS at Address
-        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
+        // Store integer in RS at Address using writeWord
+        writeWord(operand_2, reg_file[operand_1]);
         break;
     case 10: // LDR
-        // Load integer at address operand_2 to operand_1
-        reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
+        // Load integer at address operand_2 to operand_1 using readWord
+        reg_file[operand_1] = readWord(operand_2);
         break;
     case 12: // LDB
-        // Load byte at address operand_2 to operand_1
-        reg_file[operand_1] = prog_mem[operand_2];
+        // Load byte at address operand_2 to operand_1 using readByte
+        reg_file[operand_1] = readByte(operand_2);
         break;
     case 13: // ADD
         // Add operand_2 to operand_1 and store in operand_1
@@ -255,7 +267,7 @@ void execute() {
         switch (operand_1) {
         case 0:
             // Executes the STOP/Exit routine
-            cout << "Execution completed. Total memory cycles: " << mem_cycle_cntr << "\n" << endl;
+            cout << endl << "Execution completed. Total memory cycles: " << mem_cycle_cntr << "\n" << endl;
             stop_execution = true;
             break;
         case 1:
@@ -295,20 +307,20 @@ void execute() {
         }
         break;
     case 22: // ISTR
-        // Store integer in RS at Address
-        prog_mem[operand_2] = static_cast<unsigned int>(reg_file[operand_1]);
+        // Store integer in RS at Address using writeWord
+        writeWord(operand_2, reg_file[operand_1]);
         break;
     case 23: // ILDR
-        // Load integer at address operand_2 to operand_1
-        reg_file[operand_1] = *reinterpret_cast<unsigned int*>(&prog_mem[operand_2]);
+        // Load integer at address operand_2 to operand_1 using readWord
+        reg_file[operand_1] = readWord(operand_2);
         break;
     case 24: // ISTB
-        // Store byte in operand_1 and address operand_2
-        prog_mem[operand_2] = static_cast<unsigned char>(reg_file[operand_1]);
+        // Store byte in operand_1 and address operand_2 using writeByte
+        writeByte(operand_2, reg_file[operand_1]);
         break;
     case 25: // ILDB
-        // Load byte at address operand_2 to operand_1
-        reg_file[operand_1] = prog_mem[operand_2];
+        // Load byte at address operand_2 to operand_1 using readByte
+        reg_file[operand_1] = readByte(operand_2);
         break;
     case 31: //MOVI
         // Move operand_2 to operand_1

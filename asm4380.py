@@ -222,6 +222,7 @@ def process_data_instruction(instruction, line_num):
         exit(2)
 
 def process_code_instruction(instruction, line_num):
+    instruction[0] = instruction[0].upper()
     if instruction[0] not in INSTRUCTION_MAP:
         print(f"Assembler error encountered on line {line_num + 1}!")
         #print(f'Invalid instruction')
@@ -251,7 +252,7 @@ def process_code_instruction(instruction, line_num):
             # Branch instructions
             elif operator in ['BNZ', 'BGT', 'BLT', 'BRZ']:
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[0].upper()].to_bytes(4, "little", signed=False)
                 if operands[1] in code_labels:
                     bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
                 else:
@@ -260,7 +261,7 @@ def process_code_instruction(instruction, line_num):
                 write_to_file(bytecode)
             # TRP Instruction
 
-            # Instruction wehre Operand_2 is a label
+            # Instruction where Operand_2 is a label
             elif operator == 'LDA':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
@@ -278,13 +279,13 @@ def process_code_instruction(instruction, line_num):
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operand1[0].upper()].to_bytes(4, "little", signed=False)
                 if operand2[0] in code_labels:
                     bytecode += code_labels[operand2[0]].to_bytes(4, "little", signed=False)
                 elif operand2[0] in data_labels:
                     bytecode += data_labels[operand2[0]].to_bytes(4, "little", signed=False)
-                elif operand2[0] in REGISTER_MAP:
-                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                elif operand2[0].upper() in REGISTER_MAP:
+                    bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 else:
                     print(f"Assembler error encountered on line {line_num + 1}!")
                     #print(f'Invalid operand {operand2[0]}')
@@ -310,20 +311,21 @@ def process_code_instruction(instruction, line_num):
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                if operand1[0] not in REGISTER_MAP or operand2[0] not in REGISTER_MAP:
+                if operand1[0].upper() not in REGISTER_MAP or operand2[0].upper() not in REGISTER_MAP:
                     print(f'Error. Invalid register {operand1[0]}')
                     exit(1)
                 else:
-                    bytecode += REGISTER_MAP[operand1[0]].to_bytes(4, "little", signed=False)
-                    bytecode += REGISTER_MAP[operand2[0]].to_bytes(4, "little", signed=False)
+                    bytecode += REGISTER_MAP[operand1[0].upper()].to_bytes(4, "little", signed=False)
+                    bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
             # MOVI Instruction
             elif operator == 'MOVI':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
-                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
                 write_to_file(bytecode)
+
 
             # CMPI Instruction
             elif operator == 'CMPI':
@@ -341,7 +343,6 @@ def write_to_file(binary_instruction: bytes):
 def main():
     global asm_file, bin_file
     asm_file = sys.argv[1]
-    #asm_file = 'CS4380\CS4380-Emulator-Assembler\hw.asm'
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)

@@ -9,6 +9,7 @@ unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
 bool stop_execution = false;
 unsigned int mem_cycle_cntr = 0;
+extern unsigned int cache;
 
 unsigned char readByte(unsigned int address) {
     mem_cycle_cntr += 8;

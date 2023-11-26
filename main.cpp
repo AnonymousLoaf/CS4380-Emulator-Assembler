@@ -5,7 +5,7 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
-extern unsigned int mem_cycle_cntr;
+unsigned int cache = 0;
 
 int main(int argc, char* argv[]) {
     ifstream binFile;
@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
 
     else if (argc == 3) {
         if (string(argv[2]) == "0") {
-            //cache = no_cache;
+            cache = 0;
         } else if (string(argv[2]) == "1") {
-            //cache = direct_mapped;
+            cache = 1;
         } else {
             cerr << "Invalid cache configuration. Aborting.\n";
             exit(2);

@@ -23,10 +23,8 @@ class DirectMappedCache {
         DirectMappedCache(int cache_size, int block_size);
         bool isCacheHit(unsigned int address);
         void handleCacheMiss(unsigned int address);
-        unsigned char readByte(unsigned int address);
-        unsigned int readWord(unsigned int address);
-        void writeByte(unsigned int address, unsigned char byte);
-        void writeWord(unsigned int address, unsigned int word);
+        unsigned int getBlock(unsigned int address);
+        void writeBack(unsigned int address, unsigned char byte);
         void displayCache();
     };
 

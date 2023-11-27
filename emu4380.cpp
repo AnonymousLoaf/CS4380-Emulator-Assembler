@@ -21,11 +21,10 @@ unsigned char readByte(unsigned int address) {
         int hit = myCache.isCacheHit(address);
         if (hit) {
             mem_cycle_cntr += 1;  // Cache hit
-            return myCache.readByte(address);
+            return myCache.getBlock(address);
         } else {
-            mem_cycle_cntr += 15;  // Cache miss
-            myCache.handleCacheMiss(address);
-            return readByte(address);
+            mem_cycle_cntr += 8;  // Cache miss
+            return readWord(address);
         }
     }
 }
@@ -38,9 +37,10 @@ unsigned int readWord(unsigned int address) {
         int hit = myCache.isCacheHit(address);
         if (hit) {
             mem_cycle_cntr += 1;  // Cache hit
-            return myCache.readWord(address);
+            return myCache.getBlock(address);
         } else {
-            mem_cycle_cntr += 15;  // Cache miss
+            mem_cycle_cntr += 8;  // Cache miss
+            myCache.displayCache();
             myCache.handleCacheMiss(address);
             return readWord(address);
         }
@@ -53,7 +53,7 @@ void writeByte(unsigned int address, unsigned char byte) {
         *reinterpret_cast<unsigned char*>(&prog_mem[address]) = byte;
     } else {
         mem_cycle_cntr += 1;  // Cache hit
-        myCache.writeByte(address, byte);
+        myCache.writeBack(address, byte);
     }
 }
 
@@ -63,7 +63,7 @@ void writeWord(unsigned int address, unsigned int word) {
         *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
     } else {
         mem_cycle_cntr += 1;  // Cache hit
-        myCache.writeWord(address, word);
+        myCache.writeBack(address, word);
     }
 }
 

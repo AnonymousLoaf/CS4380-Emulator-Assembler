@@ -13,9 +13,8 @@ DirectMappedCache::DirectMappedCache(int cache_size, int block_size) : cache_siz
 }
 
 bool DirectMappedCache::isCacheHit(unsigned int address) {
-    unsigned int tag = address / cache_size;
+    unsigned int tag = address / block_size;
     unsigned int line_index = (address / block_size) % num_lines;
-    unsigned int offset = address % block_size;
 
     if (cache_lines[line_index].valid && cache_lines[line_index].tag == tag) {
         return true; // Cache hit
@@ -27,7 +26,7 @@ bool DirectMappedCache::isCacheHit(unsigned int address) {
 void DirectMappedCache::handleCacheMiss(unsigned int address) {
     unsigned int line_index = (address / block_size) % num_lines;
     cache_lines[line_index].valid = true;
-    cache_lines[line_index].tag = address / cache_size;
+    cache_lines[line_index].tag = address / block_size;
 
     // Fetch the required block from prog_mem
     unsigned int start_address = address - (address % block_size);
@@ -38,47 +37,26 @@ void DirectMappedCache::handleCacheMiss(unsigned int address) {
     cache_lines[line_index].dirty = false;
 }
 
-unsigned char DirectMappedCache::readByte(unsigned int address) {
+unsigned int DirectMappedCache::getBlock(unsigned int address) {
     unsigned int line_index = (address / block_size) % num_lines;
-    unsigned int offset = address % block_size;
-    return cache_lines[line_index].data[offset];
+    return cache_lines[line_index].tag;
 }
 
-unsigned int DirectMappedCache::readWord(unsigned int address) {
+
+void DirectMappedCache::writeBack(unsigned int address, unsigned char byte) {
     unsigned int line_index = (address / block_size) % num_lines;
     unsigned int offset = address % block_size;
-    unsigned int word = 0;
-    for (int i = 0; i < 4; ++i) {
-        word |= cache_lines[line_index].data[offset + i] << (8 * i);
-    }
-    return word;
-}
 
-void DirectMappedCache::writeByte(unsigned int address, unsigned char byte) {
-    if (isCacheHit(address)) {
-        unsigned int line_index = (address / block_size) % num_lines;
-        unsigned int offset = address % block_size;
+    if (cache_lines[line_index].valid && cache_lines[line_index].tag == address / block_size) {
+        // Cache hit
         cache_lines[line_index].data[offset] = byte;
         cache_lines[line_index].dirty = true;
     } else {
+        // Cache miss or different line, write directly to main memory
         prog_mem[address] = byte;
     }
 }
 
-void DirectMappedCache::writeWord(unsigned int address, unsigned int word) {
-    if (isCacheHit(address)) {
-        unsigned int line_index = (address / block_size) % num_lines;
-        unsigned int offset = address % block_size;
-        for (int i = 0; i < 4; ++i) {
-            cache_lines[line_index].data[offset + i] = (word >> (8 * i)) & 0xFF;
-        }
-        cache_lines[line_index].dirty = true;
-    } else {
-        for (int i = 0; i < 4; ++i) {
-            prog_mem[address + i] = (word >> (8 * i)) & 0xFF;
-        }
-    }
-}
 
 void DirectMappedCache::displayCache() {
     cout << "Cache Contents:" << endl;

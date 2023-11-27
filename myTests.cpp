@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "emu4380.h"
+#include "cache.h"
 
 TEST(EmulatorTest, ReadByteTest) {
     // Initialize memory

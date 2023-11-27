@@ -31,6 +31,9 @@ public:
     unsigned int readWord(unsigned int address);
     void writeByte(unsigned int address, unsigned char byte);
     void writeWord(unsigned int address, unsigned int word);
+
+    // Function to display cache contents for debugging
+    void displayCache();
 };
 
 #endif

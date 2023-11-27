@@ -15,7 +15,7 @@ public:
     CacheLine(int block_size);
 };
 
-class Cache {
+class DirectMappedCache {
 private:
     int cache_size;
     int block_size;
@@ -23,7 +23,7 @@ private:
     vector<CacheLine> cache_lines;
 
 public:
-    Cache(int cache_size, int block_size);
+    DirectMappedCache(int cache_size, int block_size);
 
     bool isCacheHit(unsigned int address, unsigned int& line_index, unsigned int& offset);
     void handleCacheMiss(unsigned int address);

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "emu4380.h"
+#include "cache.h"
 
 using namespace std;
 extern unsigned char prog_mem[];
@@ -16,7 +17,7 @@ int main(int argc, char* argv[]) {
     }
 
     else if (argc == 2) {
-        //cache = no_cache;
+        cache = 0;
     }
 
     else if (argc == 3) {
@@ -69,6 +70,12 @@ int main(int argc, char* argv[]) {
 
     // Set PC to the first address indicated by the program memory
     reg_file[PC] = prog_mem[0];
+
+    if (cache == 1) {
+        DirectMappedCache myCache(64, 16);
+    } else {
+        cache = 0;
+    }
 
     while (!stop_execution) {
         // Fetch instruction

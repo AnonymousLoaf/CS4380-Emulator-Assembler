@@ -1,5 +1,6 @@
 #include <iostream>
 #include "emu4380.h"
+#include "cache.h"
 
 using namespace std;
 
@@ -10,25 +11,86 @@ unsigned int reg_file[22];
 bool stop_execution = false;
 unsigned int mem_cycle_cntr = 0;
 extern unsigned int cache;
+extern DirectMappedCache myCache;
 
 unsigned char readByte(unsigned int address) {
-    mem_cycle_cntr += 8;
-    return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
+    if (cache == 0) {
+        mem_cycle_cntr += 8;
+        return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
+    }
+    else {
+        unsigned int line_index = 0;
+        unsigned int offset = 0;
+        bool hit = myCache.isCacheHit(address, line_index, offset);
+        if (hit) {
+            mem_cycle_cntr += 1;
+            return myCache.readByte(address);
+        }
+        else {
+            mem_cycle_cntr += 8;
+            return myCache.readByte(address);
+        }
+    }
 }
 
 unsigned int readWord(unsigned int address) {
-    mem_cycle_cntr += 8;
-    return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
+    if (cache == 0){
+        mem_cycle_cntr += 8;
+        return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
+    }
+    else {
+        unsigned int line_index = 0;
+        unsigned int offset = 0;
+        bool hit = myCache.isCacheHit(address, line_index, offset);
+        if (hit) {
+            mem_cycle_cntr += 1;
+            return myCache.readWord(address);
+        }
+        else {
+            mem_cycle_cntr += 8;
+            return myCache.readWord(address);
+        }
+    }
 }
 
 void writeByte(unsigned int address, unsigned char byte) {
-    mem_cycle_cntr += 8;
-    prog_mem[address] = byte;
+    if (cache == 0) {
+        mem_cycle_cntr += 8;
+        prog_mem[address] = byte;
+    }
+    else {
+        unsigned int line_index = 0;
+        unsigned int offset = 0;
+        bool hit = myCache.isCacheHit(address, line_index, offset);
+        if (hit) {
+            mem_cycle_cntr += 1;
+            myCache.writeByte(address, byte);
+        }
+        else {
+            mem_cycle_cntr += 8;
+            myCache.writeByte(address, byte);
+        }
+    }
 }
 
 void writeWord(unsigned int address, unsigned int word) {
-    mem_cycle_cntr += 8;
-    *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
+    if (cache == 0) {
+        mem_cycle_cntr += 8;
+        *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
+    }
+    else {
+        unsigned int line_index = 0;
+        unsigned int offset = 0;
+        bool hit = myCache.isCacheHit(address, line_index, offset);
+        if (hit) {
+            mem_cycle_cntr += 1;
+            myCache.writeWord(address, word);
+        }
+        else {
+            mem_cycle_cntr += 8;
+            myCache.writeWord(address, word);
+        }
+    }
 }
 
 

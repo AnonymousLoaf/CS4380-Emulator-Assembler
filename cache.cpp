@@ -1,18 +1,20 @@
 #include <iostream>
 #include <vector>
+#include "cache.h"
+
 using namespace std;
 
 class CacheLine {
 public:
-    bool valid;
-    bool dirty;
     unsigned int tag;
+    bool dirty;
+    bool valid;
     vector<unsigned int> data;
 
-    CacheLine(int block_size) : valid(false), dirty(false), tag(0), data(block_size) {}
+    CacheLine(int block_size) : tag(0), dirty(false), valid(false), data(block_size) {}
 };
 
-class Cache {
+class DirectMappedCache {
 private:
     int cache_size;
     int block_size;
@@ -20,34 +22,86 @@ private:
     vector<CacheLine> cache_lines;
 
 public:
-    Cache(int cache_size, int block_size) : cache_size(cache_size), block_size(block_size) {
+    DirectMappedCache(int cache_size, int block_size) : cache_size(cache_size), block_size(block_size) {
         num_lines = cache_size / block_size;
         cache_lines.resize(num_lines, CacheLine(block_size));
     }
 
-    // Function to check if there's a cache hit
     bool isCacheHit(unsigned int address, unsigned int& line_index, unsigned int& offset) {
-    // Implement logic to check if there's a cache hit
-    // Update line_index and offset accordingly
-    // Return true if there is a hit, false otherwise
+        line_index = (address / block_size) % num_lines;
+        offset = address % block_size;
+        return cache_lines[line_index].valid && (cache_lines[line_index].tag == (address / block_size));
     }
 
     void handleCacheMiss(unsigned int address) {
-    // Implement logic to handle a cache miss
-    // Load data into the cache
+        unsigned int line_index = (address / block_size) % num_lines;
+        cache_lines[line_index].valid = true;
+        cache_lines[line_index].tag = address / block_size;
+        // Load data into the cache, you need to read data from memory and update cache_lines[line_index].data
     }
 
-    unsigned char readByte(unsigned int address){
-        return;
+    unsigned char readByte(unsigned int address) {
+        unsigned int line_index, offset;
+        if (isCacheHit(address, line_index, offset)) {
+            // Cache hit
+            return cache_lines[line_index].data[offset];
+        } else {
+            // Cache miss
+            handleCacheMiss(address);
+            return cache_lines[line_index].data[offset];
+        }
     }
-    unsigned int readWord(unsigned int address){
-        return;
+
+    unsigned int readWord(unsigned int address) {
+        unsigned int line_index, offset;
+        if (isCacheHit(address, line_index, offset)) {
+            // Cache hit
+            // Read a little-endian word from the cache
+            unsigned int word = 0;
+            for (int i = 0; i < sizeof(unsigned int); ++i) {
+                word |= static_cast<unsigned int>(cache_lines[line_index].data[offset + i]) << (i * 8);
+            }
+            return word;
+        } else {
+            // Cache miss
+            handleCacheMiss(address);
+            return readWord(address);
+        }
     }
-    void writeByte(unsigned int address, unsigned char byte){
-        return;
+
+    void writeByte(unsigned int address, unsigned char byte) {
+        unsigned int line_index, offset;
+        if (isCacheHit(address, line_index, offset)) {
+            // Cache hit, update data in the cache
+            cache_lines[line_index].data[offset] = byte;
+            cache_lines[line_index].dirty = true;
+        } else {
+            // Cache miss, handle it accordingly
+            handleCacheMiss(address);
+            // Update the data in the cache
+            cache_lines[line_index].data[offset] = byte;
+            cache_lines[line_index].dirty = true;
+        }
+        // TODO: update the corresponding byte in the main memory
+
     }
-    void writeWord(unsigned int address, unsigned int word){
-        return;
+
+    void writeWord(unsigned int address, unsigned int word) {
+        unsigned int line_index, offset;
+        if (isCacheHit(address, line_index, offset)) {
+            // Cache hit, update data in the cache
+            // Write a little-endian word to the cache
+            for (int i = 0; i < sizeof(unsigned int); ++i) {
+                cache_lines[line_index].data[offset + i] = static_cast<unsigned char>((word >> (i * 8)) & 0xFF);
+            }
+            cache_lines[line_index].dirty = true;
+        } else {
+            // Cache miss, handle it accordingly
+            handleCacheMiss(address);
+            // Update the data in the cache
+            writeWord(address, word);
+        }
+        // TODO: update the corresponding word in the main memory
     }
 
     // Function to display cache contents for debugging
@@ -67,13 +121,3 @@ public:
         }
     }
 };
-
-// Example usage in your main program
-int main() {
-    Cache myCache(64, 16);  // Cache size: 64 bytes, Block size: 16 bytes
-
-    // Use myCache in your emulator...
-    myCache.displayCache();  // Display cache contents for debugging
-
-    return 0;
-}

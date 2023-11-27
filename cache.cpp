@@ -7,7 +7,7 @@ public:
     bool valid;
     bool dirty;
     unsigned int tag;
-    vector<unsigned char> data;
+    vector<unsigned int> data;
 
     CacheLine(int block_size) : valid(false), dirty(false), tag(0), data(block_size) {}
 };
@@ -27,62 +27,28 @@ public:
 
     // Function to check if there's a cache hit
     bool isCacheHit(unsigned int address, unsigned int& line_index, unsigned int& offset) {
-        unsigned int block_offset = address % block_size;
-        unsigned int block_address = address / block_size;
-        line_index = block_address % num_lines;
-        offset = block_offset;
-
-        return cache_lines[line_index].valid && cache_lines[line_index].tag == block_address;
+    // Implement logic to check if there's a cache hit
+    // Update line_index and offset accordingly
+    // Return true if there is a hit, false otherwise
     }
 
-    // Function to handle a cache miss
     void handleCacheMiss(unsigned int address) {
-        unsigned int line_index, offset;
-        if (isCacheHit(address, line_index, offset)) {
-            // Cache hit, update cache line
-            // ...
-        } else {
-            // Cache miss, load data into cache
-            loadCacheLine(address, line_index);
-
-            // Update cache line
-            cache_lines[line_index].valid = true;
-            cache_lines[line_index].tag = address / block_size;
-        }
+    // Implement logic to handle a cache miss
+    // Load data into the cache
     }
 
-    // Function to load data into cache line on cache miss
-    void loadCacheLine(unsigned int address, unsigned int line_index) {
-        // Load data into cache line from memory or wherever you're simulating
-        // For simplicity, let's assume a direct mapping, so we load the entire block.
-        // You might want to load data from your memory simulator or another source.
-
-        unsigned int block_address = address / block_size;
-        for (int i = 0; i < block_size; ++i) {
-            // Load data into the cache line
-            cache_lines[line_index].data[i] = /* Load data from memory or another source */;
-        }
+    unsigned char readByte(unsigned int address){
+        return;
     }
-
-    // Function to read a byte from cache
-    unsigned char readByte(unsigned int address) {
-        unsigned int line_index, offset;
-        if (isCacheHit(address, line_index, offset)) {
-            // Cache hit, update cache hit statistics, and increment mem_cycle_cntr by 1
-            // ...
-        } else {
-            // Cache miss, handle cache miss
-            handleCacheMiss(address);
-
-            // Update mem_cycle_cntr based on the specified rules
-            // ...
-        }
-
-        // Return the byte from the cache
-        return cache_lines[line_index].data[offset];
+    unsigned int readWord(unsigned int address){
+        return;
     }
-
-    // Other cache functions...
+    void writeByte(unsigned int address, unsigned char byte){
+        return;
+    }
+    void writeWord(unsigned int address, unsigned int word){
+        return;
+    }
 
     // Function to display cache contents for debugging
     void displayCache() {

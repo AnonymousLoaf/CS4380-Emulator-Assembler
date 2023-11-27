@@ -10,7 +10,7 @@ public:
     bool valid;
     bool dirty;
     unsigned int tag;
-    vector<unsigned char> data;
+    vector<unsigned int> data;
 
     CacheLine(int block_size);
 };
@@ -28,6 +28,9 @@ public:
     bool isCacheHit(unsigned int address, unsigned int& line_index, unsigned int& offset);
     void handleCacheMiss(unsigned int address);
     unsigned char readByte(unsigned int address);
+    unsigned int readWord(unsigned int address);
+    void writeByte(unsigned int address, unsigned char byte);
+    void writeWord(unsigned int address, unsigned int word);
 };
 
 #endif

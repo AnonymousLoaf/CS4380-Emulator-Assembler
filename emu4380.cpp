@@ -50,7 +50,7 @@ bool decode() {
         }
         break;
     case 7:  // MOV
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         stop_execution = true;
         valid = false;

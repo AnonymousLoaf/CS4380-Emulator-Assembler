@@ -15,15 +15,16 @@ public:
 
 class DirectMappedCache {    
     public:
-        int cache_size;
+        int num_cache_lines;
         int block_size;
-        int num_lines;
+
         std::vector<CacheLine> cache_lines;
 
-        DirectMappedCache(int cache_size, int block_size);
+        DirectMappedCache(int num_cache_lines, int block_size);
         bool isCacheHit(unsigned int address);
         void handleCacheMiss(unsigned int address);
-        unsigned int getBlock(unsigned int address);
+        unsigned char getByte(unsigned int address);
+        unsigned int getWord(unsigned int address);
         void writeBack(unsigned int address, unsigned char byte);
         void displayCache();
     };

@@ -21,7 +21,7 @@ unsigned char readByte(unsigned int address) {
         int hit = myCache.isCacheHit(address);
         if (hit) {
             mem_cycle_cntr += 1;  // Cache hit
-            return myCache.getBlock(address);
+            return myCache.getByte(address);
         } else {
             mem_cycle_cntr += 8;  // Cache miss
             return readWord(address);
@@ -36,12 +36,14 @@ unsigned int readWord(unsigned int address) {
     } else {
         int hit = myCache.isCacheHit(address);
         if (hit) {
+            //cout << "Cache hit" << endl;
             mem_cycle_cntr += 1;  // Cache hit
-            return myCache.getBlock(address);
+            return myCache.getWord(address);
         } else {
+            //cout << "Cache miss" << endl;
             mem_cycle_cntr += 8;  // Cache miss
-            myCache.displayCache();
             myCache.handleCacheMiss(address);
+            //myCache.displayCache();
             return readWord(address);
         }
     }

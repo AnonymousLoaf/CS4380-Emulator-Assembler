@@ -9,7 +9,7 @@ h  .byt  'H'
 i  .byt  'I'
 j  .byt  'J'
 k  .byt  'K'
-l  .byt  'L'
+l  .int  #13
 m  .byt  'M'
 n  .byt  'N'
 o  .byt  'O'

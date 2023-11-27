@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include "cache.h"
 
 using namespace std;
@@ -39,7 +38,6 @@ unsigned int DirectMappedCache::readWord(unsigned int address) {
     unsigned int line_index, offset;
     if (isCacheHit(address, line_index, offset)) {
         // Cache hit
-        // Read a little-endian word from the cache
         unsigned int word = 0;
         for (int i = 0; i < sizeof(unsigned int); ++i) {
             word |= static_cast<unsigned int>(cache_lines[line_index].data[offset + i]) << (i * 8);
@@ -65,14 +63,12 @@ void DirectMappedCache::writeByte(unsigned int address, unsigned char byte) {
         cache_lines[line_index].data[offset] = byte;
         cache_lines[line_index].dirty = true;
     }
-    // TODO: update the corresponding byte in the main memory
 }
 
 void DirectMappedCache::writeWord(unsigned int address, unsigned int word) {
     unsigned int line_index, offset;
     if (isCacheHit(address, line_index, offset)) {
         // Cache hit, update data in the cache
-        // Write a little-endian word to the cache
         for (int i = 0; i < sizeof(unsigned int); ++i) {
             cache_lines[line_index].data[offset + i] = static_cast<unsigned char>((word >> (i * 8)) & 0xFF);
         }
@@ -83,10 +79,8 @@ void DirectMappedCache::writeWord(unsigned int address, unsigned int word) {
         // Update the data in the cache
         writeWord(address, word);
     }
-    // TODO: update the corresponding word in the main memory
 }
 
-// Function to display cache contents for debugging
 void DirectMappedCache::displayCache() {
     cout << "Cache Contents:" << endl;
     for (int i = 0; i < num_lines; ++i) {

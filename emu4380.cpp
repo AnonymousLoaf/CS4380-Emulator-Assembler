@@ -18,14 +18,16 @@ unsigned char readByte(unsigned int address) {
         mem_cycle_cntr += 8;
         return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
     } else {
-        unsigned int line_index = 0, offset = 0;
-        bool hit = myCache.isCacheHit(address, line_index, offset);
+        int hit = myCache.isCacheHit(address);
         if (hit) {
+            cout << "Cache hit" << endl;
             mem_cycle_cntr += 1;  // Cache hit
             return myCache.readByte(address);
         } else {
-            mem_cycle_cntr += 15;  // Cache miss, first 4 bytes read
-            return myCache.readByte(address);
+            cout << "Cache miss" << endl;
+            mem_cycle_cntr += 15;  // Cache miss
+            myCache.handleCacheMiss(address);
+            return readByte(address);
         }
     }
 }
@@ -35,14 +37,16 @@ unsigned int readWord(unsigned int address) {
         mem_cycle_cntr += 8;
         return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
     } else {
-        unsigned int line_index = 0, offset = 0;
-        bool hit = myCache.isCacheHit(address, line_index, offset);
+        int hit = myCache.isCacheHit(address);
         if (hit) {
+            cout << "Cache hit" << endl;
             mem_cycle_cntr += 1;  // Cache hit
             return myCache.readWord(address);
         } else {
-            mem_cycle_cntr += 15;  // Cache miss, first 4 bytes read
-            return myCache.readWord(address);
+            cout << "Cache miss" << endl;
+            mem_cycle_cntr += 15;  // Cache miss
+            myCache.handleCacheMiss(address);
+            return readWord(address);
         }
     }
 }
@@ -52,15 +56,8 @@ void writeByte(unsigned int address, unsigned char byte) {
         mem_cycle_cntr += 8;
         *reinterpret_cast<unsigned char*>(&prog_mem[address]) = byte;
     } else {
-        unsigned int line_index = 0, offset = 0;
-        bool hit = myCache.isCacheHit(address, line_index, offset);
-        if (hit) {
-            mem_cycle_cntr += 1;  // Cache hit
-            myCache.writeByte(address, byte);
-        } else {
-            mem_cycle_cntr += 15;  // Cache miss, first 4 bytes written
-            myCache.writeByte(address, byte);
-        }
+        mem_cycle_cntr += 1;  // Cache hit
+        myCache.writeByte(address, byte);
     }
 }
 
@@ -69,22 +66,8 @@ void writeWord(unsigned int address, unsigned int word) {
         mem_cycle_cntr += 8;
         *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
     } else {
-        unsigned int line_index = 0, offset = 0;
-        bool hit = myCache.isCacheHit(address, line_index, offset);
-        if (hit) {
-            mem_cycle_cntr += 1;  // Cache hit
-            myCache.writeWord(address, word);
-        } else {
-            mem_cycle_cntr += 15;  // Cache miss, first 4 bytes written
-
-            // Check if a write-back is needed
-            if (myCache.cache_lines[line_index].dirty) {
-                mem_cycle_cntr += 14;  // Write-back cycles for the first block
-                myCache.cache_lines[line_index].dirty = false;
-            }
-
-            myCache.writeWord(address, word);
-        }
+        mem_cycle_cntr += 1;  // Cache hit
+        myCache.writeWord(address, word);
     }
 }
 

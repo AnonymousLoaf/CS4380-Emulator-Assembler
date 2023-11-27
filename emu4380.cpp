@@ -20,11 +20,9 @@ unsigned char readByte(unsigned int address) {
     } else {
         int hit = myCache.isCacheHit(address);
         if (hit) {
-            cout << "Cache hit" << endl;
             mem_cycle_cntr += 1;  // Cache hit
             return myCache.readByte(address);
         } else {
-            cout << "Cache miss" << endl;
             mem_cycle_cntr += 15;  // Cache miss
             myCache.handleCacheMiss(address);
             return readByte(address);
@@ -39,11 +37,9 @@ unsigned int readWord(unsigned int address) {
     } else {
         int hit = myCache.isCacheHit(address);
         if (hit) {
-            cout << "Cache hit" << endl;
             mem_cycle_cntr += 1;  // Cache hit
             return myCache.readWord(address);
         } else {
-            cout << "Cache miss" << endl;
             mem_cycle_cntr += 15;  // Cache miss
             myCache.handleCacheMiss(address);
             return readWord(address);
@@ -73,18 +69,12 @@ void writeWord(unsigned int address, unsigned int word) {
 
 void fetch() {
     // Read the instruction
-    // uint32_t* instruction_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    // unsigned int operation = *instruction_ptr;
     unsigned int operation = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
-    // uint32_t* operand_1_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    // unsigned int operand_1 = *operand_1_ptr;
     unsigned int operand_1 = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
 
-    // uint32_t* operand_2_ptr = reinterpret_cast<uint32_t*>(&prog_mem[reg_file[PC]]);
-    // unsigned int operand_2 = *operand_2_ptr;
     unsigned int operand_2 = readWord(reg_file[PC]);
     reg_file[PC] += INSTRUCTION_SIZE;
     

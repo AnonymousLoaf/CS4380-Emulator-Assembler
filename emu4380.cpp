@@ -44,7 +44,7 @@ unsigned int readWord(unsigned int address) {
             //cout << "Cache miss" << endl;
             mem_cycle_cntr += 8;  // Cache miss
             myCache.handleCacheMiss(address);
-            myCache.displayCache();
+            //myCache.displayCache();
             return readWord(address);
         }
     }

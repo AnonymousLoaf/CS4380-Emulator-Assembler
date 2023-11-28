@@ -7,7 +7,7 @@
 using namespace std;
 extern unsigned char prog_mem[];
 unsigned int cache = 0;
-DirectMappedCache myCache(64, 16);
+DirectMappedCache myCache(6, 9);
 
 int main(int argc, char* argv[]) {
     ifstream binFile;

@@ -76,6 +76,7 @@ unsigned int DirectMappedCache::getWord(unsigned int address) {
     unsigned int line_index = (address / block_size) % num_cache_lines;
     unsigned int offset = address % block_size;
 
+    // Make sure the full value is in the cache line
     if (cache_lines[line_index].valid && cache_lines[line_index].tag == address / block_size) {
         // Cache hit
         if (offset + 3 < cache_lines[line_index].data.size()) {
@@ -85,20 +86,23 @@ unsigned int DirectMappedCache::getWord(unsigned int address) {
             }
             return word;
         }
+        // If the instruction doesn't fit in the current block, fetch the next block
+        mem_cycle_cntr += 12;
+        handleCacheMiss(address + 4);
+        line_index = (address / block_size) % num_cache_lines; // Recalculate line_index
+        offset = address % block_size; // Recalculate offset
     }
 
-    // Cache miss or different line, fetch from main memory
-    mem_cycle_cntr += 6;
+    // Cache miss or different line, add to cache
+    mem_cycle_cntr += 12;
     handleCacheMiss(address);
-    if (offset + 3 < cache_lines[line_index].data.size()) {
-        unsigned int word = 0;
-        for (int i = 0; i < 4; ++i) {
-            word += cache_lines[line_index].data[offset + i] << (8 * i);
-        }
-        return word;
-    } else {
-        exit(1);
+
+    // Now, the full word should be in the cache
+    unsigned int word = 0;
+    for (int i = 0; i < 4; ++i) {
+        word += cache_lines[line_index].data[offset + i] << (8 * i);
     }
+    return word;
 }
 
 
@@ -128,7 +132,7 @@ void DirectMappedCache::displayCache() {
                 cout << static_cast<int>(cache_lines[i].data[j]) << " ";
             }
         } else {
-            cout << "Invalid";
+            cout << "Un-Populated";
         }
         cout << endl;
     }

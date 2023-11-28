@@ -19,4 +19,6 @@ r  .byt  'R'
 s  .byt  'S'
     JMP MAIN
 
-MAIN TRP #0
+MAIN LDB  R3,  a
+     TRP #3
+     TRP #0

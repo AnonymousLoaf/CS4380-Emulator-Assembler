@@ -19,12 +19,13 @@ unsigned char readByte(unsigned int address) {
         return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
     } else {
         int hit = myCache.isCacheHit(address);
+        mem_cycle_cntr += 1;
         if (hit) {
-            mem_cycle_cntr += 1;  // Cache hit
             return myCache.getByte(address);
         } else {
-            mem_cycle_cntr += 8;  // Cache miss
-            return readWord(address);
+            mem_cycle_cntr += 8;  // Cache miss penalty
+            myCache.handleCacheMiss(address);
+            return readByte(address);
         }
     }
 }
@@ -43,7 +44,7 @@ unsigned int readWord(unsigned int address) {
             //cout << "Cache miss" << endl;
             mem_cycle_cntr += 8;  // Cache miss
             myCache.handleCacheMiss(address);
-            //myCache.displayCache();
+            myCache.displayCache();
             return readWord(address);
         }
     }
@@ -72,12 +73,15 @@ void writeWord(unsigned int address, unsigned int word) {
 void fetch() {
     // Read the instruction
     unsigned int operation = readWord(reg_file[PC]);
+    //cout << "Operation: " << operation << endl;
     reg_file[PC] += INSTRUCTION_SIZE;
 
     unsigned int operand_1 = readWord(reg_file[PC]);
+    //cout << "Operand 1: " << operand_1 << endl;
     reg_file[PC] += INSTRUCTION_SIZE;
 
     unsigned int operand_2 = readWord(reg_file[PC]);
+    //cout << "Operand 2: " << operand_2 << endl;
     reg_file[PC] += INSTRUCTION_SIZE;
     
     // Update control registers

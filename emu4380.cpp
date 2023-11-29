@@ -145,6 +145,7 @@ bool decode() {
         }
         break;
     case 13: // ADD
+    case 14: // ADDI
     case 15: // SUB
     case 16: // MUL
     case 17: // DIV
@@ -153,6 +154,14 @@ bool decode() {
         stop_execution = true;
         valid = false;
     }
+        break;
+    case 18: // AND
+    case 19: // OR
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+            stop_execution = true;
+            valid = false;
+        }
         break;
     case 20: //CMP
         if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
@@ -179,6 +188,17 @@ bool decode() {
         break;
     case 32: // CMPI
         if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 33: // MULI
+    case 34: // DIVI
+        if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 38: // SDIV
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
             valid = false;
         }
         break;

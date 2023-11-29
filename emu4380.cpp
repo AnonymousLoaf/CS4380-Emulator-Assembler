@@ -202,6 +202,21 @@ bool decode() {
             valid = false;
         }
         break;
+    case 40: // PSHR
+    case 41: // PSHB
+    case 42: // POPR
+    case 43: // POPB
+        if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 44: // CALL
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+            valid = false;
+        }
+        break;
+    case 45: // RET
+        break;
     default:
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         valid = false;
@@ -290,6 +305,10 @@ void execute() {
         // Add operand_2 to operand_1 and store in operand_1
         reg_file[operand_1] += reg_file[operand_2];
         break;
+    case 14: // ADDI
+        // Add immediate value in operand_2 to operand_1 and store in operand_1
+        reg_file[operand_1] += operand_2;   
+        break;
     case 15: // SUB
         // Subtract operand_2 from operand_1 and store in operand_1
         reg_file[operand_1] -= reg_file[operand_2];
@@ -306,6 +325,14 @@ void execute() {
         else {
             cerr << "Cannot divide by 0!" << endl;
         }
+        break;
+    case 18: // AND
+        // NOT bitwise AND operand_1 and operand_2 and store in operand_1
+        reg_file[operand_1] = ~(reg_file[operand_1] & reg_file[operand_2]);
+        break;
+    case 19: // OR
+        // NOT bitwise OR operand_1 and operand_2 and store in operand_1
+        reg_file[operand_1] = ~(reg_file[operand_1] | reg_file[operand_2]);
         break;
     case 20: // CMP
         // Compare operand_1 and operand_2 and set flags
@@ -344,6 +371,23 @@ void execute() {
             cin.ignore();
             cin.get(input);
             reg_file[3] = static_cast<unsigned int>(input);
+            break;
+        case 5:
+            // Write the pascal style string whose starting address is in R3 to stdout
+            for (int i = reg_file[3]; readByte(i) != 0; ++i) {
+                cout << readByte(i);
+            }
+            break;
+        case 6:
+            // Read a string from stdin and store it in memory as a Pascal-style string whose starting address is in R3.
+            char input2;
+            cin.ignore();
+            cin.get(input2);
+            for (int i = reg_file[3]; input2 != '\n'; ++i) {
+                writeByte(i, static_cast<unsigned char>(input2));
+                cin.get(input2);
+            }
+            writeByte(reg_file[3] + 1, 0);
             break;
         case 98:
             // Print all registers to console
@@ -393,6 +437,58 @@ void execute() {
         else {
             reg_file[operand_1] = -1;
         }
+        break;
+    case 33: // MULI
+        // Multiply operand_1 by operand_2 and store in operand_1
+        reg_file[operand_1] *= operand_2;
+        break;
+    case 34: // DIVI
+        // Divide operand_1 by operand_2 and store in operand_1
+        if (operand_2 != 0) {
+            reg_file[operand_1] /= operand_2;
+        }
+        else {
+            cerr << "Cannot divide by 0!" << endl;
+        }
+        break;
+    case 38: // SDIV
+        // Store result of SIGNED division of operand_1 by operand_2 in operand_1
+        if (reg_file[operand_2] != 0) {
+            reg_file[operand_1] = static_cast<int>(reg_file[operand_1]) / static_cast<int>(reg_file[operand_2]);
+        }
+        else {
+            cerr << "Cannot divide by 0!" << endl;
+        }
+        break;
+    case 40: // PSHR
+        // Push contents of operand_1 onto stack and set SP to SP - 4
+        reg_file[SP] -= 4;
+        writeWord(reg_file[SP], reg_file[operand_1]);
+        break;
+    case 41: // PSHB
+        // Push contents of operand_1 onto stack and set SP to SP - 1
+        reg_file[SP] -= 1;
+        writeByte(reg_file[SP], reg_file[operand_1]);
+        break;
+    case 42: // POPR
+        // Pop contents of stack into operand_1 and set SP to SP + 4
+        reg_file[operand_1] = readWord(reg_file[SP]);
+        reg_file[SP] += 4;
+        break;
+    case 43: // POPB
+        // Pop contents of stack into operand_1 and set SP to SP + 1
+        reg_file[operand_1] = readByte(reg_file[SP]);
+        reg_file[SP] += 1;
+        break;
+    case 44: // CALL
+        // Push PC onto stack and set PC
+        writeWord(reg_file[SP], reg_file[PC]);
+        // Set PC to operand_2
+        reg_file[PC] = operand_1;
+        break;
+    case 45: // RET
+        // Pop PC from stack
+        reg_file[PC] = readWord(reg_file[SP]);
         break;
     default:
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;

@@ -40,6 +40,9 @@ INSTRUCTION_MAP = {
     'ADD': { 
         'opcode': (13).to_bytes(4, "little", signed=False),
         'operands': 2 },
+    'ADDI': {
+        'opcode': (14).to_bytes(4, "little", signed=False),
+        'operands': 2 },
     'SUB': { 
         'opcode': (15).to_bytes(4, "little", signed=False),
         'operands': 2 },
@@ -48,6 +51,12 @@ INSTRUCTION_MAP = {
         'operands': 2 },
     'DIV': { 
         'opcode': (17).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'AND': {
+        'opcode': (18).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'OR': {
+        'opcode': (19).to_bytes(4, "little", signed=False),
         'operands': 2 },
     'CMP': {
         'opcode': (20).to_bytes(4, "little", signed=False),
@@ -73,11 +82,51 @@ INSTRUCTION_MAP = {
     'CMPI': {
         'opcode': (32).to_bytes(4, "little", signed=False),
         'operands': 2 },
+    'MULI': {
+        'opcode': (33).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'DIVI': {
+        'opcode': (34).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ALCI': {
+        'opcode': (35).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ALLC': {
+        'opcode': (36).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'IALLC': {
+        'opcode': (37).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'SDIV': {
+        'opcode': (38).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'PSHR': {
+        'opcode': (40).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'PSHB': {
+        'opcode': (41).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'POPR': {
+        'opcode': (42).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'POPB': {
+        'opcode': (43).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'CALL': {
+        'opcode': (44).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'RET': {
+        'opcode': (45).to_bytes(4, "little", signed=False),
+        'operands': 0 },
 }
 
 DIRECTIVE_MAP = {
     '.INT': (0).to_bytes(4, "little", signed=True),
     '.BYT': (0).to_bytes(1, "little", signed=False),
+    #TODO: make it so BTS allocates x bytes of space
+    '.BTS': (0).to_bytes(1, "little", signed=False),
+    #TODO: make it so STR allocates len(str) + 2 bytes of space
+    '.STR': (0).to_bytes(1, "little", signed=False),
 }
 
 REGISTER_MAP = {

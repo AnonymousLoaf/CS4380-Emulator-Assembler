@@ -197,6 +197,21 @@ bool decode() {
             valid = false;
         }
         break;
+    case 35: // ALCI
+        if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 36: //ALLC
+        if (operand_1 < 0 || operand_1 > 15) {
+            valid = false;
+        }
+        break;
+    case 37: // IALLC
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+            valid = false;
+        }
+        break;
     case 38: // SDIV
         if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
             valid = false;
@@ -450,6 +465,21 @@ void execute() {
         else {
             cerr << "Cannot divide by 0!" << endl;
         }
+        break;
+    case 35: // ALCI
+        // Allocate operand_2 bytes of memory and store address in operand_1
+        reg_file[operand_1] = reg_file[HP];
+        reg_file[HP] += operand_2;
+        break;
+    case 36: // ALLC
+        // Allocate operand_2 bytes of memory and store address in operand_1
+        reg_file[operand_1] = reg_file[HP];
+        reg_file[HP] += reg_file[operand_2];
+        break;
+    case 37: // IALLC
+        // Allocate operand_2 bytes of memory and store address in operand_1
+        reg_file[operand_1] = reg_file[HP];
+        reg_file[HP] += operand_2;
         break;
     case 38: // SDIV
         // Store result of SIGNED division of operand_1 by operand_2 in operand_1

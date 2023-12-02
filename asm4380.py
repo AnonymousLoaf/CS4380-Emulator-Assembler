@@ -308,7 +308,6 @@ def process_code_instruction(instruction, line_num):
                     print(f'Error. Invalid label {operands[1]}')
                     exit(1)
                 write_to_file(bytecode)
-            # TRP Instruction
 
             # Instruction where Operand_2 is a label
             elif operator == 'LDA':
@@ -323,7 +322,7 @@ def process_code_instruction(instruction, line_num):
                     exit(1)
                 write_to_file(bytecode)
             
-            # Operations where Operand 1 is a register and Operand 2 is a register or a label
+            # Instructions where Operand 1 is a register and Operand 2 is a register or a label
             elif operator in ['MOV', 'STR', 'LDR', 'STB', 'LDB', 'ADD', 'SUB', 'MUL', 'DIV']:
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()

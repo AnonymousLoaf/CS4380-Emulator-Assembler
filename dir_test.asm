@@ -1,6 +1,6 @@
-a_str  .STR  "Hello"
+a_str  .STR  "Hello\n"
        JMP   MAIN
-MAIN   LDB   R3,  a_str
+MAIN   LDA   R3,  a_str
        TRP   #5
        TRP   #98
        TRP   #0

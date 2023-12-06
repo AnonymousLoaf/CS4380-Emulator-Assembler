@@ -145,7 +145,6 @@ def remove_comments(line):
     :param line: The line
     :return: The line without comments
     """
-    # Remove comments from the line
     if ";" in line:
         line = line.split(";", 1)[0].strip()
     return line
@@ -292,7 +291,7 @@ def process_data_instruction(instruction, line_num):
             data = (0).to_bytes(num_bytes + 1, "little", signed=False)
             write_to_file(data)
         else:
-            first_byte = (len(data) - 2).to_bytes(1, "little", signed=True)
+            first_byte = (len(data) - 1).to_bytes(1, "little", signed=True)
             write_to_file(first_byte)
             middle_bytes = data[1:-1]
             for byte in middle_bytes:

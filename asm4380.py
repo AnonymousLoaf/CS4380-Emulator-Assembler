@@ -309,7 +309,7 @@ def process_code_instruction(instruction, line_num):
                     exit(1)
                 write_to_file(bytecode)
 
-            # Instruction where Operand_2 is a label
+            # Instruction where Operand_2 is a label (Address)
             elif operator == 'LDA':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
@@ -367,19 +367,11 @@ def process_code_instruction(instruction, line_num):
                     bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
-            # MOVI Instruction
-            elif operator == 'MOVI':
+            # Immediate Instruction
+            elif operator in ['MOVI', 'CMPI', 'ADDI', 'MULI', 'DIVI', 'ALCI']:
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
                 bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
-                write_to_file(bytecode)
-
-
-            # CMPI Instruction
-            elif operator == 'CMPI':
-                bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
-                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
 

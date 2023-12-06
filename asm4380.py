@@ -120,14 +120,7 @@ INSTRUCTION_MAP = {
         'operands': 0 },
 }
 
-DIRECTIVE_MAP = {
-    '.INT': (0).to_bytes(4, "little", signed=True),
-    '.BYT': (0).to_bytes(1, "little", signed=False),
-    #TODO: make it so BTS allocates x bytes of space
-    '.BTS': (0).to_bytes(1, "little", signed=False),
-    #TODO: make it so STR allocates len(str) + 2 bytes of space
-    '.STR': (0).to_bytes(1, "little", signed=False),
-}
+DIRECTIVE_MAP = ['.INT', '.BYT', '.BTS', '.STR']
 
 REGISTER_MAP = {
     'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
@@ -179,7 +172,17 @@ def first_pass(asm_file):
                 check_upper = ''
             #Handle directive with no label
             if check_upper in DIRECTIVE_MAP:
-                num_bytes = 4 if check_upper == '.INT' else 1
+                if check_upper == '.INT':
+                    num_bytes = 4
+                elif check_upper == '.BYT':
+                    num_bytes = 1
+                elif check_upper == '.BTS':
+                    num_bytes = int(line_elements[1].replace('#', ''))
+                elif check_upper == '.STR':
+                    if line_elements[1][0] != '"' or line_elements[1][-1] != '"':
+                        num_bytes = int(line_elements[1].replace('#', '')) + 2
+                    else:
+                        num_bytes = len(line_elements[1]) + 2
                 num_data_bytes += num_bytes
                 bytes_from_start += num_bytes
                 instructions.append(line_elements)
@@ -192,7 +195,17 @@ def first_pass(asm_file):
                 line_elements = line_elements[1:]
                 check_upper = line_elements[0].upper()
                 if check_upper in DIRECTIVE_MAP:
-                    num_bytes = 4 if check_upper == '.INT' else 1
+                    if check_upper == '.INT':
+                        num_bytes = 4
+                    elif check_upper == '.BYT':
+                        num_bytes = 1
+                    elif check_upper == '.BTS':
+                        num_bytes = int(line_elements[1].replace('#', ''))
+                    elif check_upper == '.STR':
+                        if line_elements[1][0] != '"' or line_elements[1][-1] != '"':
+                            num_bytes = int(line_elements[1].replace('#', '')) + 2
+                        else:
+                            num_bytes = len(line_elements[1].replace('"', '')) + 2
                     data_labels[label] = bytes_from_start
                     num_data_bytes += num_bytes
                     bytes_from_start += num_bytes
@@ -266,6 +279,27 @@ def process_data_instruction(instruction, line_num):
             data = data.replace("'", '')
             data = ord(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
+    elif data_type == '.BTS':
+        num_bytes = int(instruction[1].replace('#', ''))
+        data = (0).to_bytes(num_bytes, "little", signed=False)
+        write_to_file(data)
+
+    elif data_type == '.STR':
+        if data[0] != '"' or data[-1] != '"':
+            num_bytes = int(instruction[1].replace('#', ''))
+            data = int(num_bytes).to_bytes(1, "little", signed=True)
+            write_to_file(data)
+            data = (0).to_bytes(num_bytes + 1, "little", signed=False)
+            write_to_file(data)
+        else:
+            first_byte = (len(data) - 2).to_bytes(1, "little", signed=True)
+            write_to_file(first_byte)
+            middle_bytes = data[1:-1]
+            for byte in middle_bytes:
+                data = ord(byte).to_bytes(1, "little", signed=False)
+                write_to_file(data)
+            null_byte = (0).to_bytes(1, "little", signed=False)
+            write_to_file(null_byte)
     else:
         print(f"Assembler error encountered on line {line_num}!")
         exit(2)
@@ -382,7 +416,8 @@ def write_to_file(binary_instruction: bytes):
 
 def main():
     global asm_file, bin_file
-    asm_file = sys.argv[1]
+    #asm_file = sys.argv[1]
+    asm_file = "dir_test.asm"
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)

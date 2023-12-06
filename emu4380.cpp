@@ -96,9 +96,9 @@ bool decode() {
     int operand_1 = cntrl_regs[OPERAND_1];
     int operand_2 = cntrl_regs[OPERAND_2];
 
-    //cout << "Operation: " << operation << endl;
-    //cout << "Operand 1: " << operand_1 << endl;
-    //cout << "Operand 2: " << operand_2 << endl;
+    //cout << "Decode Operation: " << operation << endl;
+    //cout << "Decode Operand 1: " << operand_1 << endl;
+    //cout << "Decode Operand 2: " << operand_2 << endl;
 
     bool valid = true;
 
@@ -169,7 +169,7 @@ bool decode() {
         }
         break;
     case 21: // TRP
-        if (!(operand_1 == 0 || operand_1 == 1 || operand_1 == 2 || operand_1 == 3 || operand_1 == 4 || operand_1 == 98)) {
+        if (!(operand_1 == 0 || operand_1 == 1 || operand_1 == 2 || operand_1 == 3 || operand_1 == 4 || operand_1 == 5 || operand_1 == 6 || operand_1 == 98)) {
             valid = false;
         }
         break;

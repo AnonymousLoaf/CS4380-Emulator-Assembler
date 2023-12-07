@@ -202,9 +202,11 @@ def first_pass(asm_file):
                         num_bytes = int(line_elements[1].replace('#', ''))
                     elif check_upper == '.STR':
                         if line_elements[1][0] != '"' or line_elements[1][-1] != '"':
-                            num_bytes = int(line_elements[1].replace('#', '')) + 2
+                            num_bytes = len(line_elements[1].replace('#', '')) + 2
                         else:
-                            num_bytes = len(line_elements[1].replace('"', '')) + 2
+                            # Handle escape sequences
+                            escaped_string = line_elements[1][1:-1].encode().decode('unicode-escape')
+                            num_bytes = len(escaped_string) + 2
                     data_labels[label] = bytes_from_start
                     num_data_bytes += num_bytes
                     bytes_from_start += num_bytes
@@ -294,11 +296,24 @@ def process_data_instruction(instruction, line_num):
             first_byte = (len(data) - 1).to_bytes(1, "little", signed=True)
             write_to_file(first_byte)
             middle_bytes = data[1:-1]
-            for byte in middle_bytes:
-                data = ord(byte).to_bytes(1, "little", signed=False)
-                write_to_file(data)
+            i = 0
+            while i < len(middle_bytes):
+                byte = middle_bytes[i]
+                if byte == '\\':
+                    if i + 1 < len(middle_bytes):
+                        next_byte = middle_bytes[i + 1]
+                        if next_byte in ['n', 't', 'r', "'", '\\', '"']:
+                            # Convert escape sequences to their ASCII values
+                            escape_mapping = {'n': '\n', 't': '\t', 'r': '\r', "'": "'", '\\': '\\', '"': '"'}
+                            byte = escape_mapping.get(next_byte, next_byte)
+                            i += 1  # Skip the next character as it has been processed
+                data_byte = byte.encode('utf-8')
+                write_to_file(data_byte)
+                i += 1
+
             null_byte = (0).to_bytes(1, "little", signed=False)
             write_to_file(null_byte)
+
     else:
         print(f"Assembler error encountered on line {line_num}!")
         exit(2)

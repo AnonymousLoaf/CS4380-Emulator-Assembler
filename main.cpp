@@ -72,12 +72,14 @@ int main(int argc, char* argv[]) {
     // Set PC to the first address indicated by the program memory
     reg_file[PC] = prog_mem[0];
 
-    // Set SB and SP to the last address indicated by the program memory
-    reg_file[SB] = fileSize - 1;
-    reg_file[SP] = fileSize - 1;
+    // Set SB to the highest available memory address + 1
+    reg_file[SB] = fileSize;
 
-    // Set the SL to the address of the first byte past the last instruction read in to program memory
-    reg_file[SL] = fileSize;
+    // Set SP to the highest available memory address + 1
+    reg_file[SP] = fileSize;
+
+    // Set SL to the address of the first byte past the last instruction read into prog_mem
+    reg_file[SL] = fileSize + 1;
 
     while (!stop_execution) {
         // Fetch instruction

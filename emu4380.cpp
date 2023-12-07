@@ -388,21 +388,24 @@ void execute() {
             reg_file[3] = static_cast<unsigned int>(input);
             break;
         case 5:
-            // Write the pascal style string whose starting address is in R3 to stdout
-            for (int i = reg_file[3]; readByte(i) != 0; ++i) {
-                cout << readByte(i);
+            // Write a null terminated pascal style string whose starting address is in R3 to stdout
+            cout << readByte(reg_file[3]);
+            while (readByte(reg_file[3]) != 0) {
+                cout << static_cast<char>(readByte(reg_file[3]));
+                reg_file[3] += 1;
             }
             break;
         case 6:
-            // Read a string from stdin and store it in memory as a Pascal-style string whose starting address is in R3.
+            // Read a string from stdin and store it in memory as a Pascal-style string whose starting address is in R3 and is null terminated.
             char input2;
             cin.ignore();
             cin.get(input2);
-            for (int i = reg_file[3]; input2 != '\n'; ++i) {
-                writeByte(i, static_cast<unsigned char>(input2));
+            while (input2 != '\n') {
+                writeByte(reg_file[3], static_cast<unsigned char>(input2));
+                reg_file[3] += 1;
                 cin.get(input2);
             }
-            writeByte(reg_file[3] + 1, 0);
+            writeByte(reg_file[3], 0);
             break;
         case 98:
             // Print all registers to console

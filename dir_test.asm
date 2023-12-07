@@ -1,4 +1,4 @@
-a_str  .STR  "Hello\n"
+a_str  .STR  "Hello\\"
        JMP   MAIN
 MAIN   LDA   R3,  a_str
        TRP   #5

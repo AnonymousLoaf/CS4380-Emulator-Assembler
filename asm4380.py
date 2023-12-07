@@ -431,7 +431,7 @@ def write_to_file(binary_instruction: bytes):
 def main():
     global asm_file, bin_file
     #asm_file = sys.argv[1]
-    asm_file = "dir_test.asm"
+    asm_file = "arith_test.asm"
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)

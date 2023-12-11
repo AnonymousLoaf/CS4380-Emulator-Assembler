@@ -140,11 +140,6 @@ num_data_bytes = 0
 bytes_from_start = 4
 
 def remove_comments(line):
-    """
-    Removes comments from the line
-    :param line: The line
-    :return: The line without comments
-    """
     if ";" in line:
         line = line.split(";", 1)[0].strip()
     return line
@@ -393,7 +388,7 @@ def process_code_instruction(instruction, line_num):
                 elif operand2[0].upper() in REGISTER_MAP:
                     bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 else:
-                    print(f"Assembler error encountered on line {line_num + 1}!")
+                    print(f"Assembler error encountered on line {line_num + 2}!")
                     #print(f'Invalid operand {operand2[0]}')
                     exit(2)
                 write_to_file(bytecode)
@@ -431,6 +426,55 @@ def process_code_instruction(instruction, line_num):
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
                 bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
                 write_to_file(bytecode)
+
+            # ALLC Instruction
+            elif operator == 'ALLC':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+            
+            # IALLC Instruction
+            elif operator == 'IALLC':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[1].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+            
+            # SDIV Instruction
+            elif operator == 'SDIV':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[1].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+
+            # PSHR Instruction
+            elif operator in ['PSHR', 'PSHB', 'POPR', 'POPB']:
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += filler
+                write_to_file(bytecode)
+
+            # CALL Instruction
+            elif operator == 'CALL':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                if operands[0] in code_labels:
+                    bytecode += code_labels[operands[0]].to_bytes(4, "little", signed=False)
+                else:
+                    print(f'Error. Invalid label {operands[0]}')
+                    exit(1)
+                write_to_file(bytecode)
+            
+            # RET Instruction
+            elif operator == 'RET':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += filler
+                bytecode += filler
+                write_to_file(bytecode)
+            else:
+                print(f"Assembler error encountered on line {line_num + 1}!")
+                #print(f'Invalid instruction')
+                exit(2)
 
 
 def write_to_file(binary_instruction: bytes):

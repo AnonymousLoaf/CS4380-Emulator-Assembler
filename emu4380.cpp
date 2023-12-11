@@ -96,9 +96,9 @@ bool decode() {
     int operand_1 = cntrl_regs[OPERAND_1];
     int operand_2 = cntrl_regs[OPERAND_2];
 
-    //cout << "Decode Operation: " << operation << endl;
-    //cout << "Decode Operand 1: " << operand_1 << endl;
-    //cout << "Decode Operand 2: " << operand_2 << endl;
+    cout << "Decode Operation: " << operation << endl;
+    cout << "Decode Operand 1: " << operand_1 << endl;
+    cout << "Decode Operand 2: " << operand_2 << endl;
 
     bool valid = true;
 

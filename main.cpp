@@ -6,6 +6,7 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
+extern const int memory_size;
 unsigned int cache = 0;
 DirectMappedCache myCache(64, 16);
 
@@ -69,17 +70,23 @@ int main(int argc, char* argv[]) {
 
     binFile.close();
 
+    //cout << "Program Memory: " << endl;
+    //    for (int i = 0; i < memory_size; ++i) {
+    //        cout << static_cast<int>(prog_mem[i]) << " ";
+    //    }
+    //    cout << endl;
+
     // Set PC to the first address indicated by the program memory
     reg_file[PC] = prog_mem[0];
 
     // Set SB to the highest available memory address + 1
-    reg_file[SB] = fileSize;
+    reg_file[SB] = memory_size + 1;
 
     // Set SP to the highest available memory address + 1
-    reg_file[SP] = fileSize;
+    reg_file[SP] = memory_size + 1;
 
     // Set SL to the address of the first byte past the last instruction read into prog_mem
-    reg_file[SL] = fileSize + 1;
+    reg_file[SL] = fileSize;
 
     while (!stop_execution) {
         // Fetch instruction

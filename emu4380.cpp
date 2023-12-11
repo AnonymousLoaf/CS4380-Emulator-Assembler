@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int memory_size = 131072;
+extern const int memory_size = 131072;
 unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
@@ -96,9 +96,9 @@ bool decode() {
     int operand_1 = cntrl_regs[OPERAND_1];
     int operand_2 = cntrl_regs[OPERAND_2];
 
-    cout << "Decode Operation: " << operation << endl;
-    cout << "Decode Operand 1: " << operand_1 << endl;
-    cout << "Decode Operand 2: " << operand_2 << endl;
+    //cout << "Decode Operation: " << operation << endl;
+    //cout << "Decode Operand 1: " << operand_1 << endl;
+    //cout << "Decode Operand 2: " << operand_2 << endl;
 
     bool valid = true;
 
@@ -226,9 +226,6 @@ bool decode() {
         }
         break;
     case 44: // CALL
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
-            valid = false;
-        }
         break;
     case 45: // RET
         break;
@@ -245,6 +242,7 @@ bool decode() {
 
 
 void execute() {
+    // Print out the entire program memory
     // Extract the operation and operands
     unsigned int operation = cntrl_regs[OPERATION];
     unsigned int operand_1 = cntrl_regs[OPERAND_1];
@@ -505,14 +503,21 @@ void execute() {
         reg_file[SP] += 1;
         break;
     case 44: // CALL
-        // Push PC onto stack and set PC
-        writeWord(reg_file[SP], reg_file[PC]);
-        // Set PC to operand_2
-        reg_file[PC] = operand_1;
+        // Check if there's enough space in the stack
+        if (reg_file[SP] >= 4) {
+            // Push PC onto stack and set PC to operand_1
+            reg_file[SP] -= 4;
+            writeWord(reg_file[SP], reg_file[PC]);
+            reg_file[PC] = operand_1;
+        } else {
+            cerr << "ERROR: Stack overflow in CALL instruction" << endl;
+            stop_execution = true;
+        }
         break;
     case 45: // RET
-        // Pop PC from stack
+        // Pop stack into PC
         reg_file[PC] = readWord(reg_file[SP]);
+        reg_file[SP] += 4;
         break;
     default:
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;

@@ -274,26 +274,17 @@ void execute() {
         if (reg_file[operand_1] > 0) {
             reg_file[PC] = operand_2;
         }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
-        }
         break;
     case 5: // BLT
         // Update PC to Address if RS < 0
         if (reg_file[operand_1] < 0) {
             reg_file[PC] = operand_2;
         }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
-        }
         break;
     case 6: // BRZ
         // Update PC to Address if RS == 0
         if (reg_file[operand_1] == 0) {
             reg_file[PC] = operand_2;
-        }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
         }
         break;
     case 7: // MOV

@@ -157,6 +157,13 @@ def first_pass(asm_file):
         for line in f:
             line = line.replace("' '", 'temp_space')
             line = line.replace("';'", 'temp_semicolon')
+            if '.STR' in line.upper():
+                # Extract the string from the line
+                string_start = line.find('"')
+                string_end = line.rfind('"')
+                if string_start != -1 and string_end != -1:
+                    temp_string = line[string_start:string_end+1]
+                    line = line.replace(temp_string, 'temp_string')
             line = remove_comments(line)
             line_elements = line.strip().split()
             #Put the space and ; back in
@@ -165,6 +172,8 @@ def first_pass(asm_file):
                     line_elements[idx] = "' '"
                 elif line_elements[idx] == 'temp_semicolon':
                     line_elements[idx] = "';'"
+                elif line_elements[idx] == 'temp_string':
+                    line_elements[idx] = temp_string
             if len(line_elements) > 0:
                 check_upper = line_elements[0].upper()
             else:
@@ -287,6 +296,7 @@ def process_data_instruction(instruction, line_num):
 
     elif data_type == '.STR':
         if data[0] != '"' or data[-1] != '"':
+            print(data[0])
             num_bytes = int(instruction[1].replace('#', ''))
             data = int(num_bytes).to_bytes(1, "little", signed=True)
             write_to_file(data)
@@ -430,8 +440,8 @@ def write_to_file(binary_instruction: bytes):
 
 def main():
     global asm_file, bin_file
-    #asm_file = sys.argv[1]
-    asm_file = "arith_test.asm"
+    asm_file = sys.argv[1]
+    #asm_file = "program_a.asm"
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)

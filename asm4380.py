@@ -335,7 +335,7 @@ def process_code_instruction(instruction, line_num):
         operands = ('').join(instruction).split(',')
         if len(instruction) < num_operands:
             print(f"Assembler error encountered on line {line_num + 1}!")
-            #print(f'Not enough operands for {operator}')
+            print(f'Not enough operands for {operator}')
             exit(2)
         else:
             if operator == 'JMP':
@@ -448,7 +448,7 @@ def process_code_instruction(instruction, line_num):
                 bytecode += REGISTER_MAP[operands[1].replace('r', 'R')].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
-            # PSHR Instruction
+            # Stack Instruction
             elif operator in ['PSHR', 'PSHB', 'POPR', 'POPB']:
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)

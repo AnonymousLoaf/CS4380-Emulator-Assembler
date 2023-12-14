@@ -1,48 +1,55 @@
-; Input prompt strings
-prompt      .STR  "Enter dividend: "
-prompt2     .STR  "Enter divisor: "
-result_str  .STR  "Remainder: "
-NL          .BYT  '\n'
-dividend    .INT  0
-divisor     .INT  0
-remainder   .INT  0
-message_1   .STR  "Error: Division by zero!\n"
-            JMP   MAIN
+; Program B: Modulus Function
 
-MOD         CMPI   R1, #0           ; Check if divisor is zero
-            LDR   R3, divisor       ; Load divisor
-            BRZ   R3, DivideByZero  ; Branch to error handling if divisor is zero
-            MOVI  R0, #0            ; Initialize remainder to zero
-            MOVI  R2, #0            ; Initialize quotient to zero
-MODLoop     SUB   R0, R3            ; Subtract divisor from remainder
-            ADDI  R2, #1            ; Increment quotient
-            CMP   R0, R3            ; Check if remainder is less than divisor
-            BGT   R0, MODLoop       ; Continue loop until remainder is less than divisor
-            ADD   R0, R3            ; Adjust remainder to get the actual modulus
-            RET
+; Constants
+INPUT_PROMPT        .STR    "Enter the dividend: "
+DIVISOR_PROMPT      .STR    "Enter the divisor: "
+RESULT_PROMPT       .STR    "The remainder is: "
+NEWLINE             .BYT    '\n'
 
-DivideByZero STR  R3, message_1     ; Store error string in R3
-             TRP   #5               ; Print error string
-             TRP   #0               ; Halt the program
+; Data
+DIVIDEND            .INT    #0
+DIVISOR             .INT    #0
 
-MAIN        LDA   R3, prompt        ; Load prompt string
-            TRP   #5                ; Print prompt
-            TRP   #2                ; Read integer from user into R3
-            STR   R3, dividend      ; Store user input in dividend
-            LDA   R3, prompt2       ; Load prompt2 string
-            TRP   #5                ; Print prompt2
-            TRP   #2                ; Read integer from user into R3
-            STR   R3, divisor       ; Store user input in divisor
+; Function: mod
+; Parameters: R0 (dividend), R1 (divisor)
+; Returns: R0 (remainder)
+mod:
+    CMP     R1, #0          ; Check if divisor is zero
+    BEQ     INVALID_DIVISOR ; If zero, return an error value (-1)
 
-            CALL  MOD               ; Call the mod function to calculate remainder
+    MOV     R2, R0          ; Copy the dividend to R2
+    DIV     R2, R1          ; Divide the dividend by the divisor
 
-            ; Display the remainder
-            LDA   R3, result_str   ; Load result string
-            TRP   #5               ; Print result string
-            LDR   R3, dividend     ; Load dividend
-            TRP   #1               ; Print dividend as integer
-            LDA   R3, result_str   ; Load result string
-            TRP   #5               ; Print result string
-            LDR   R3, R0           ; Load remainder
-            TRP   #1               ; Print remainder as integer
-            TRP   #0               ; Halt the program
+    MUL     R2, R1          ; Multiply the quotient by the divisor
+    SUB     R0, R0, R2      ; Subtract the result from the original dividend to get the remainder
+
+    RET
+
+INVALID_DIVISOR:
+    MOVI    R0, #-1         ; Set R0 to -1 to indicate an error
+    RET
+
+; Main Program
+MAIN:
+    LDA     R3, INPUT_PROMPT
+    TRP     #5              ; Print the input prompt for the dividend
+    TRP     #2              ; Read the dividend from the user
+    MOV     DIVIDEND, R0    ; Store the dividend
+
+    LDA     R3, DIVISOR_PROMPT
+    TRP     #5              ; Print the input prompt for the divisor
+    TRP     #2              ; Read the divisor from the user
+    MOV     DIVISOR, R0     ; Store the divisor
+
+    ; Call the mod function
+    PSHR    DIVISOR         ; Push the divisor onto the stack
+    PSHR    DIVIDEND        ; Push the dividend onto the stack
+    CALL    mod             ; Call the mod function
+    POPR    R0              ; Retrieve the remainder
+
+    LDA     R3, RESULT_PROMPT
+    TRP     #5              ; Print the result prompt
+    TRP     #1              ; Print the remainder
+    TRP     #5              ; Print newline
+
+    TRP     #0              ; Exit

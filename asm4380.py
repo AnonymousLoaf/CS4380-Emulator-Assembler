@@ -323,7 +323,13 @@ def process_code_instruction(instruction, line_num):
             elif operator == 'MOVI':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
-                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                if "'" in operands[1]:
+                    bytecode += ord(operands[1].replace("'", '')).to_bytes(4, "little", signed=False)
+                elif '#' in operands[1]:
+                    bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                else:
+                    print(f'Error. Invalid operand {operands[1]}')
+                    exit(1)
                 write_to_file(bytecode)
 
 

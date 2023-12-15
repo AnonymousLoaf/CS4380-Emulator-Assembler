@@ -10,8 +10,8 @@ unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
 bool stop_execution = false;
 unsigned int mem_cycle_cntr = 0;
-extern unsigned int cache;
-extern DirectMappedCache myCache;
+unsigned int cache = 0;
+DirectMappedCache myCache(64, 16);
 
 unsigned char readByte(unsigned int address) {
     if (cache == 0) {
@@ -168,7 +168,7 @@ bool decode() {
     case 23: // ILDR
     case 24: // ISTB
     case 25: // ILDB
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= 15 || operand_2 < 0)) {
             valid = false;
         }
         break;
@@ -339,7 +339,7 @@ void execute() {
         break;
     case 23: // ILDR
         // Load integer at address operand_2 to operand_1 using readWord
-        reg_file[operand_1] = readWord(operand_2);
+        reg_file[operand_1] = readWord(reg_file[operand_2]);
         break;
     case 24: // ISTB
         // Store byte in operand_1 and address operand_2 using writeByte
@@ -347,7 +347,7 @@ void execute() {
         break;
     case 25: // ILDB
         // Load byte at address operand_2 to operand_1 using readByte
-        reg_file[operand_1] = readByte(operand_2);
+        reg_file[operand_1] = readByte(reg_file[operand_2]);
         break;
     case 31: //MOVI
         // Move operand_2 to operand_1

@@ -252,13 +252,13 @@ def process_code_instruction(instruction, line_num):
             # Branch instructions
             elif operator in ['BNZ', 'BGT', 'BLT', 'BRZ']:
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                bytecode += REGISTER_MAP[operands[0].upper()].to_bytes(4, "little", signed=False)
-                if operands[1] in code_labels:
-                    bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
+                if operands[0] not in REGISTER_MAP and operands[1] not in code_labels:
+                    print(f"Assembler error encountered on line {line_num + 1}!")
+                    exit(2)
                 else:
-                    print(f'Error. Invalid label {operands[1]}')
-                    exit(1)
-                write_to_file(bytecode)
+                    bytecode += REGISTER_MAP[operands[0].upper()].to_bytes(4, "little", signed=False)
+                    bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
+                    write_to_file(bytecode)
             # TRP Instruction
 
             # Instruction where Operand_2 is a label
@@ -311,8 +311,8 @@ def process_code_instruction(instruction, line_num):
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                if operand1[0].upper() not in REGISTER_MAP or operand2[0].upper() not in REGISTER_MAP:
-                    print(f'Error. Invalid register {operand1[0]}')
+                if operand1[0].upper() not in REGISTER_MAP and operand2[0].upper() not in REGISTER_MAP:
+                    print(f"Assembler error encountered on line {line_num + 1}!")
                     exit(1)
                 else:
                     bytecode += REGISTER_MAP[operand1[0].upper()].to_bytes(4, "little", signed=False)

@@ -1,8 +1,10 @@
-test  .INT  #1
+test  .INT  #3
     JMP MAIN
 
-MAIN LDR  R3,  test
+MAIN LDA  R3, test
+     MOVI R7, #50
+     ISTR R7, R3
+     LDR R3, test
      TRP #1
-     MOVI R3, 'H'
-     TRP #3
+     TRP #98
      TRP #0

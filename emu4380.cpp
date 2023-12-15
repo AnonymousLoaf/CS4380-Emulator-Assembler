@@ -224,26 +224,17 @@ void execute() {
         if (reg_file[operand_1] > 0) {
             reg_file[PC] = operand_2;
         }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
-        }
         break;
     case 5: // BLT
         // Update PC to Address if RS < 0
         if (reg_file[operand_1] < 0) {
             reg_file[PC] = operand_2;
         }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
-        }
         break;
     case 6: // BRZ
         // Update PC to Address if RS == 0
         if (reg_file[operand_1] == 0) {
             reg_file[PC] = operand_2;
-        }
-        else {
-            reg_file[PC] += INSTRUCTION_SIZE;
         }
         break;
     case 7: // MOV
@@ -344,7 +335,7 @@ void execute() {
         break;
     case 22: // ISTR
         // Store integer in RS at Address using writeWord
-        writeWord(operand_2, reg_file[operand_1]);
+        writeWord(operand_1, reg_file[operand_2]);
         break;
     case 23: // ILDR
         // Load integer at address operand_2 to operand_1 using readWord

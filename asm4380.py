@@ -372,7 +372,7 @@ def process_code_instruction(instruction, line_num):
                     bytecode += data_labels[operands[1]].to_bytes(4, "little", signed=False)
                 else:
                     print(f'Error. Invalid label {operands[1]}')
-                    exit(1)
+                    exit(2)
                 write_to_file(bytecode)
             
             # Instructions where Operand 1 is a register and Operand 2 is a register or a label
@@ -414,17 +414,30 @@ def process_code_instruction(instruction, line_num):
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 if operand1[0].upper() not in REGISTER_MAP or operand2[0].upper() not in REGISTER_MAP:
                     print(f'Error. Invalid register {operand1[0]}')
-                    exit(1)
+                    exit(2)
                 else:
                     bytecode += REGISTER_MAP[operand1[0].upper()].to_bytes(4, "little", signed=False)
                     bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
             # Immediate Instruction
-            elif operator in ['MOVI', 'CMPI', 'ADDI', 'MULI', 'DIVI', 'ALCI']:
+            elif operator == 'MOVI':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
-                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                if "'" in operands[1]:
+                    bytecode += ord(operands[1].replace("'", '')).to_bytes(4, "little", signed=False)
+                elif '#' in operands[1]:
+                    bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                else:
+                    print(f'Error. Invalid operand {operands[1]}')
+                    exit(2)
+                write_to_file(bytecode)
+
+            # CMPI Instruction
+            elif operator == 'CMPI':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
             # ALLC Instruction

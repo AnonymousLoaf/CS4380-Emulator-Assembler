@@ -10,8 +10,8 @@ unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
 bool stop_execution = false;
 unsigned int mem_cycle_cntr = 0;
-extern unsigned int cache;
-extern DirectMappedCache myCache;
+unsigned int cache = 0;
+DirectMappedCache myCache(64,16);
 
 unsigned char readByte(unsigned int address) {
     if (cache == 0) {

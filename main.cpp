@@ -6,10 +6,7 @@
 
 using namespace std;
 extern unsigned char prog_mem[];
-<<<<<<< HEAD
-=======
 extern const int memory_size;
->>>>>>> project-4
 extern unsigned int cache;
 extern DirectMappedCache myCache;
 

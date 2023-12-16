@@ -360,10 +360,7 @@ def process_code_instruction(instruction, line_num):
                 else:
                     bytecode += REGISTER_MAP[operands[0].upper()].to_bytes(4, "little", signed=False)
                     bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
-                else:
-                    print(f'Error. Invalid label {operands[1]}')
-                    exit(1)
-                write_to_file(bytecode)
+                    write_to_file(bytecode)
 
             # Instruction where Operand_2 is a label (Address)
             elif operator == 'LDA':

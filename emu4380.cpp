@@ -11,11 +11,7 @@ unsigned int reg_file[22];
 bool stop_execution = false;
 unsigned int mem_cycle_cntr = 0;
 unsigned int cache = 0;
-<<<<<<< HEAD
-DirectMappedCache myCache(64, 16);
-=======
 DirectMappedCache myCache(64,16);
->>>>>>> project-4
 
 unsigned char readByte(unsigned int address) {
     if (cache == 0) {
@@ -187,11 +183,7 @@ bool decode() {
     case 23: // ILDR
     case 24: // ISTB
     case 25: // ILDB
-<<<<<<< HEAD
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= 15 || operand_2 < 0)) {
-=======
         if (operand_1 < 0 || operand_1 > 21 || (operand_2 >= memory_size || operand_2 < 0)) {
->>>>>>> project-4
             valid = false;
         }
         break;

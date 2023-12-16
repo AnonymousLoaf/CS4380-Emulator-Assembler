@@ -40,6 +40,9 @@ INSTRUCTION_MAP = {
     'ADD': { 
         'opcode': (13).to_bytes(4, "little", signed=False),
         'operands': 2 },
+    'ADDI': {
+        'opcode': (14).to_bytes(4, "little", signed=False),
+        'operands': 2 },
     'SUB': { 
         'opcode': (15).to_bytes(4, "little", signed=False),
         'operands': 2 },
@@ -48,6 +51,12 @@ INSTRUCTION_MAP = {
         'operands': 2 },
     'DIV': { 
         'opcode': (17).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'AND': {
+        'opcode': (18).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'OR': {
+        'opcode': (19).to_bytes(4, "little", signed=False),
         'operands': 2 },
     'CMP': {
         'opcode': (20).to_bytes(4, "little", signed=False),
@@ -73,12 +82,45 @@ INSTRUCTION_MAP = {
     'CMPI': {
         'opcode': (32).to_bytes(4, "little", signed=False),
         'operands': 2 },
+    'MULI': {
+        'opcode': (33).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'DIVI': {
+        'opcode': (34).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ALCI': {
+        'opcode': (35).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'ALLC': {
+        'opcode': (36).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'IALLC': {
+        'opcode': (37).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'SDIV': {
+        'opcode': (38).to_bytes(4, "little", signed=False),
+        'operands': 2 },
+    'PSHR': {
+        'opcode': (40).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'PSHB': {
+        'opcode': (41).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'POPR': {
+        'opcode': (42).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'POPB': {
+        'opcode': (43).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'CALL': {
+        'opcode': (44).to_bytes(4, "little", signed=False),
+        'operands': 1 },
+    'RET': {
+        'opcode': (45).to_bytes(4, "little", signed=False),
+        'operands': 0 },
 }
 
-DIRECTIVE_MAP = {
-    '.INT': (0).to_bytes(4, "little", signed=True),
-    '.BYT': (0).to_bytes(1, "little", signed=False),
-}
+DIRECTIVE_MAP = ['.INT', '.BYT', '.BTS', '.STR']
 
 REGISTER_MAP = {
     'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4, 'R5': 5,
@@ -98,12 +140,6 @@ num_data_bytes = 0
 bytes_from_start = 4
 
 def remove_comments(line):
-    """
-    Removes comments from the line
-    :param line: The line
-    :return: The line without comments
-    """
-    # Remove comments from the line
     if ";" in line:
         line = line.split(";", 1)[0].strip()
     return line
@@ -116,6 +152,13 @@ def first_pass(asm_file):
         for line in f:
             line = line.replace("' '", 'temp_space')
             line = line.replace("';'", 'temp_semicolon')
+            if '.STR' in line.upper():
+                # Extract the string from the line
+                string_start = line.find('"')
+                string_end = line.rfind('"')
+                if string_start != -1 and string_end != -1:
+                    temp_string = line[string_start:string_end+1]
+                    line = line.replace(temp_string, 'temp_string')
             line = remove_comments(line)
             line_elements = line.strip().split()
             #Put the space and ; back in
@@ -124,13 +167,25 @@ def first_pass(asm_file):
                     line_elements[idx] = "' '"
                 elif line_elements[idx] == 'temp_semicolon':
                     line_elements[idx] = "';'"
+                elif line_elements[idx] == 'temp_string':
+                    line_elements[idx] = temp_string
             if len(line_elements) > 0:
                 check_upper = line_elements[0].upper()
             else:
                 check_upper = ''
             #Handle directive with no label
             if check_upper in DIRECTIVE_MAP:
-                num_bytes = 4 if check_upper == '.INT' else 1
+                if check_upper == '.INT':
+                    num_bytes = 4
+                elif check_upper == '.BYT':
+                    num_bytes = 1
+                elif check_upper == '.BTS':
+                    num_bytes = int(line_elements[1].replace('#', ''))
+                elif check_upper == '.STR':
+                    if line_elements[1][0] != '"' or line_elements[1][-1] != '"':
+                        num_bytes = int(line_elements[1].replace('#', '')) + 2
+                    else:
+                        num_bytes = len(line_elements[1]) + 2
                 num_data_bytes += num_bytes
                 bytes_from_start += num_bytes
                 instructions.append(line_elements)
@@ -143,7 +198,19 @@ def first_pass(asm_file):
                 line_elements = line_elements[1:]
                 check_upper = line_elements[0].upper()
                 if check_upper in DIRECTIVE_MAP:
-                    num_bytes = 4 if check_upper == '.INT' else 1
+                    if check_upper == '.INT':
+                        num_bytes = 4
+                    elif check_upper == '.BYT':
+                        num_bytes = 1
+                    elif check_upper == '.BTS':
+                        num_bytes = int(line_elements[1].replace('#', ''))
+                    elif check_upper == '.STR':
+                        if line_elements[1][0] != '"' or line_elements[1][-1] != '"':
+                            num_bytes = len(line_elements[1].replace('#', '')) + 2
+                        else:
+                            # Handle escape sequences
+                            escaped_string = line_elements[1][1:-1].encode().decode('unicode-escape')
+                            num_bytes = len(escaped_string) + 2
                     data_labels[label] = bytes_from_start
                     num_data_bytes += num_bytes
                     bytes_from_start += num_bytes
@@ -184,6 +251,7 @@ def second_pass(instructions):
             process_code_instruction(instruction, line_num)
             line_num += 1
         else:
+            #print(f'Instruction: {instruction}')
             print(f"Assembler error encountered on line {line_num}!")
             exit(2)
 
@@ -217,6 +285,40 @@ def process_data_instruction(instruction, line_num):
             data = data.replace("'", '')
             data = ord(data).to_bytes(1, "little", signed=False)
             write_to_file(data)
+    elif data_type == '.BTS':
+        num_bytes = int(instruction[1].replace('#', ''))
+        data = (0).to_bytes(num_bytes, "little", signed=False)
+        write_to_file(data)
+
+    elif data_type == '.STR':
+        if data[0] != '"' or data[-1] != '"':
+            num_bytes = int(instruction[1].replace('#', ''))
+            data = int(num_bytes).to_bytes(1, "little", signed=True)
+            write_to_file(data)
+            data = (0).to_bytes(num_bytes + 1, "little", signed=False)
+            write_to_file(data)
+        else:
+            first_byte = (len(data) - 1).to_bytes(1, "little", signed=True)
+            write_to_file(first_byte)
+            middle_bytes = data[1:-1]
+            i = 0
+            while i < len(middle_bytes):
+                byte = middle_bytes[i]
+                if byte == '\\':
+                    if i + 1 < len(middle_bytes):
+                        next_byte = middle_bytes[i + 1]
+                        if next_byte in ['n', 't', 'r', "'", '\\', '"']:
+                            # Convert escape sequences to their ASCII values
+                            escape_mapping = {'n': '\n', 't': '\t', 'r': '\r', "'": "'", '\\': '\\', '"': '"'}
+                            byte = escape_mapping.get(next_byte, next_byte)
+                            i += 1  # Skip the next character as it has been processed
+                data_byte = byte.encode('utf-8')
+                write_to_file(data_byte)
+                i += 1
+
+            null_byte = (0).to_bytes(1, "little", signed=False)
+            write_to_file(null_byte)
+
     else:
         print(f"Assembler error encountered on line {line_num}!")
         exit(2)
@@ -233,7 +335,7 @@ def process_code_instruction(instruction, line_num):
         operands = ('').join(instruction).split(',')
         if len(instruction) < num_operands:
             print(f"Assembler error encountered on line {line_num + 1}!")
-            #print(f'Not enough operands for {operator}')
+            print(f'Not enough operands for {operator}')
             exit(2)
         else:
             if operator == 'JMP':
@@ -258,10 +360,12 @@ def process_code_instruction(instruction, line_num):
                 else:
                     bytecode += REGISTER_MAP[operands[0].upper()].to_bytes(4, "little", signed=False)
                     bytecode += code_labels[operands[1]].to_bytes(4, "little", signed=False)
-                    write_to_file(bytecode)
-            # TRP Instruction
+                else:
+                    print(f'Error. Invalid label {operands[1]}')
+                    exit(1)
+                write_to_file(bytecode)
 
-            # Instruction where Operand_2 is a label
+            # Instruction where Operand_2 is a label (Address)
             elif operator == 'LDA':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
@@ -271,10 +375,10 @@ def process_code_instruction(instruction, line_num):
                     bytecode += data_labels[operands[1]].to_bytes(4, "little", signed=False)
                 else:
                     print(f'Error. Invalid label {operands[1]}')
-                    exit(1)
+                    exit(2)
                 write_to_file(bytecode)
             
-            # Operations where Operand 1 is a register and Operand 2 is a register or a label
+            # Instructions where Operand 1 is a register and Operand 2 is a register or a label
             elif operator in ['MOV', 'STR', 'LDR', 'STB', 'LDB', 'ADD', 'SUB', 'MUL', 'DIV']:
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
@@ -292,6 +396,16 @@ def process_code_instruction(instruction, line_num):
                     exit(2)
                 write_to_file(bytecode)
             
+            # ADDI Instruction
+            elif operator == 'ADDI':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                if '#' in operands[1]:
+                    bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                else:
+                    print(f'Error. Invalid operand {operands[1]}')
+                    exit(2)
+                write_to_file(bytecode)
             # CMP Instruction
             elif operator == 'CMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
@@ -311,15 +425,15 @@ def process_code_instruction(instruction, line_num):
                 operand1 = operands[0].strip().split()
                 operand2 = operands[1].strip().split()
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
-                if operand1[0].upper() not in REGISTER_MAP and operand2[0].upper() not in REGISTER_MAP:
-                    print(f"Assembler error encountered on line {line_num + 1}!")
-                    exit(1)
+                if operand1[0].upper() not in REGISTER_MAP or operand2[0].upper() not in REGISTER_MAP:
+                    print(f'Error. Invalid register {operand1[0]}')
+                    exit(2)
                 else:
                     bytecode += REGISTER_MAP[operand1[0].upper()].to_bytes(4, "little", signed=False)
                     bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
 
-            # MOVI Instruction
+            # Immediate Instruction
             elif operator == 'MOVI':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
@@ -329,9 +443,8 @@ def process_code_instruction(instruction, line_num):
                     bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
                 else:
                     print(f'Error. Invalid operand {operands[1]}')
-                    exit(1)
+                    exit(2)
                 write_to_file(bytecode)
-
 
             # CMPI Instruction
             elif operator == 'CMPI':
@@ -339,6 +452,57 @@ def process_code_instruction(instruction, line_num):
                 bytecode += REGISTER_MAP[operands[0]].to_bytes(4, "little", signed=False)
                 bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
                 write_to_file(bytecode)
+
+            # ALLC Instruction
+            elif operator == 'ALLC':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+            
+            # IALLC Instruction
+            elif operator == 'IALLC':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[1].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+            
+            # SDIV Instruction
+            elif operator == 'SDIV':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += REGISTER_MAP[operands[1].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                write_to_file(bytecode)
+
+            # Stack Instruction
+            elif operator in ['PSHR', 'PSHB', 'POPR', 'POPB']:
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                bytecode += filler
+                write_to_file(bytecode)
+
+            # CALL Instruction
+            elif operator == 'CALL':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                if operands[0] in code_labels:
+                    bytecode += code_labels[operands[0]].to_bytes(4, "little", signed=False)
+                    bytecode += filler
+                else:
+                    print(f'Error. Invalid label {operands[0]}')
+                    exit(1)
+                write_to_file(bytecode)
+            
+            # RET Instruction
+            elif operator == 'RET':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += filler
+                bytecode += filler
+                write_to_file(bytecode)
+            else:
+                print(f'Instruction: {operator}')
+                print(f"Assembler error encountered on line {line_num + 1}!")
+                #print(f'Invalid instruction')
+                exit(2)
 
 
 def write_to_file(binary_instruction: bytes):
@@ -349,6 +513,7 @@ def write_to_file(binary_instruction: bytes):
 def main():
     global asm_file, bin_file
     asm_file = sys.argv[1]
+    #asm_file = "program_a.asm"
     if not asm_file.endswith('.asm'):
         print("USAGE: python asm4380.py inputFile.asm")
         exit(1)

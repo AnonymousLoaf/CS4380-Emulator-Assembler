@@ -251,6 +251,7 @@ def second_pass(instructions):
             process_code_instruction(instruction, line_num)
             line_num += 1
         else:
+            #print(f'Instruction: {instruction}')
             print(f"Assembler error encountered on line {line_num}!")
             exit(2)
 
@@ -388,11 +389,21 @@ def process_code_instruction(instruction, line_num):
                 elif operand2[0].upper() in REGISTER_MAP:
                     bytecode += REGISTER_MAP[operand2[0].upper()].to_bytes(4, "little", signed=False)
                 else:
-                    print(f"Assembler error encountered on line {line_num + 2}!")
+                    print(f"Assembler error encountered on line {line_num + 1}!")
                     #print(f'Invalid operand {operand2[0]}')
                     exit(2)
                 write_to_file(bytecode)
             
+            # ADDI Instruction
+            elif operator == 'ADDI':
+                bytecode = INSTRUCTION_MAP[operator]['opcode']
+                bytecode += REGISTER_MAP[operands[0].replace('r', 'R')].to_bytes(4, "little", signed=False)
+                if '#' in operands[1]:
+                    bytecode += int(operands[1].replace('#', '')).to_bytes(4, "little", signed=True)
+                else:
+                    print(f'Error. Invalid operand {operands[1]}')
+                    exit(2)
+                write_to_file(bytecode)
             # CMP Instruction
             elif operator == 'CMP':
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
@@ -473,6 +484,7 @@ def process_code_instruction(instruction, line_num):
                 bytecode = INSTRUCTION_MAP[operator]['opcode']
                 if operands[0] in code_labels:
                     bytecode += code_labels[operands[0]].to_bytes(4, "little", signed=False)
+                    bytecode += filler
                 else:
                     print(f'Error. Invalid label {operands[0]}')
                     exit(1)
@@ -485,6 +497,7 @@ def process_code_instruction(instruction, line_num):
                 bytecode += filler
                 write_to_file(bytecode)
             else:
+                print(f'Instruction: {operator}')
                 print(f"Assembler error encountered on line {line_num + 1}!")
                 #print(f'Invalid instruction')
                 exit(2)

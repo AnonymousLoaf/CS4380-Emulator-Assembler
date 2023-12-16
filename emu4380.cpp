@@ -110,7 +110,7 @@ bool decode() {
         }
         break;
     case 2: // JMR
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
@@ -118,19 +118,19 @@ bool decode() {
     case 4: // BGT
     case 5: // BLT
     case 6: // BRZ
-        if ((operand_1 < 0 || operand_1 > 15) || (operand_2 >= memory_size || operand_2 < 0)) {
+        if ((operand_1 < 0 || operand_1 > 21) || (operand_2 >= memory_size || operand_2 < 0)) {
             valid = false;
         }
         break;
     case 7:  // MOV
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         stop_execution = true;
         valid = false;
     }
         break;
     case 8: // LDA
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 >= memory_size || operand_2 < 0)) {
             valid = false;
         }
         break;
@@ -138,33 +138,39 @@ bool decode() {
     case 10: // LDR
     case 11: // STB
     case 12: // LDB
-        if ((operand_1 < 0 || operand_1 > 15) || (operand_2 < 0 || operand_2 > memory_size)) {
+        if ((operand_1 < 0 || operand_1 > 21) || (operand_2 < 0 || operand_2 > memory_size)) {
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             stop_execution = true;
             valid = false;
         }
         break;
     case 13: // ADD
-    case 14: // ADDI
     case 15: // SUB
     case 16: // MUL
     case 17: // DIV
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
         cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
         stop_execution = true;
         valid = false;
     }
         break;
+    case 14: // ADDI
+        if (operand_1 < 0 || operand_1 > 21) {
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+            stop_execution = true;
+            valid = false;
+        }
+        break;
     case 18: // AND
     case 19: // OR
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
             cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
             stop_execution = true;
             valid = false;
         }
         break;
     case 20: //CMP
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
             valid = false;
         }
         break;
@@ -177,43 +183,43 @@ bool decode() {
     case 23: // ILDR
     case 24: // ISTB
     case 25: // ILDB
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 >= memory_size || operand_2 < 0)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 >= memory_size || operand_2 < 0)) {
             valid = false;
         }
         break;
     case 31: // MOVI
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 32: // CMPI
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 33: // MULI
     case 34: // DIVI
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 35: // ALCI
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 36: //ALLC
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 37: // IALLC
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
             valid = false;
         }
         break;
     case 38: // SDIV
-        if (operand_1 < 0 || operand_1 > 15 || (operand_2 < 0 || operand_2 > 15)) {
+        if (operand_1 < 0 || operand_1 > 21 || (operand_2 < 0 || operand_2 > 21)) {
             valid = false;
         }
         break;
@@ -221,11 +227,16 @@ bool decode() {
     case 41: // PSHB
     case 42: // POPR
     case 43: // POPB
-        if (operand_1 < 0 || operand_1 > 15) {
+        if (operand_1 < 0 || operand_1 > 21) {
             valid = false;
         }
         break;
     case 44: // CALL
+        if (operand_1 >= memory_size || operand_1 < 0) {
+            cerr << "INVALID INSTRUCTION AT: " << reg_file[PC] << endl;
+            stop_execution = true;
+            valid = false;
+        }
         break;
     case 45: // RET
         break;
@@ -378,10 +389,10 @@ void execute() {
             break;
         case 5:
             // Write a null terminated pascal style string whose starting address is in R3 to stdout
-            cout << readByte(reg_file[3]);
+            // cout << readByte(reg_file[3]);
             while (readByte(reg_file[3]) != 0) {
-                cout << static_cast<char>(readByte(reg_file[3]));
                 reg_file[3] += 1;
+                cout << static_cast<char>(readByte(reg_file[3]));
             }
             break;
         case 6:
@@ -485,34 +496,28 @@ void execute() {
     case 40: // PSHR
         // Push contents of operand_1 onto stack and set SP to SP - 4
         reg_file[SP] -= 4;
-        writeWord(reg_file[SP], reg_file[operand_1]);
+        writeWord(reg_file[SP], operand_1);
         break;
     case 41: // PSHB
         // Push contents of operand_1 onto stack and set SP to SP - 1
         reg_file[SP] -= 1;
-        writeByte(reg_file[SP], reg_file[operand_1]);
+        writeByte(reg_file[SP], operand_1);
         break;
     case 42: // POPR
         // Pop contents of stack into operand_1 and set SP to SP + 4
-        reg_file[operand_1] = readWord(reg_file[SP]);
+        operand_1 = readWord(reg_file[SP]);
         reg_file[SP] += 4;
         break;
     case 43: // POPB
         // Pop contents of stack into operand_1 and set SP to SP + 1
-        reg_file[operand_1] = readByte(reg_file[SP]);
+        operand_1 = readByte(reg_file[SP]);
         reg_file[SP] += 1;
         break;
     case 44: // CALL
-        // Check if there's enough space in the stack
-        if (reg_file[SP] >= 4) {
-            // Push PC onto stack and set PC to operand_1
-            reg_file[SP] -= 4;
-            writeWord(reg_file[SP], reg_file[PC]);
-            reg_file[PC] = operand_1;
-        } else {
-            cerr << "ERROR: Stack overflow in CALL instruction" << endl;
-            stop_execution = true;
-        }
+        // Push PC onto stack and set PC to operand_1
+        reg_file[SP] -= 4;
+        writeWord(reg_file[SP], reg_file[PC]);
+        reg_file[PC] = operand_1;
         break;
     case 45: // RET
         // Pop stack into PC

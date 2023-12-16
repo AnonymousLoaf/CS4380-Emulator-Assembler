@@ -1,55 +1,44 @@
-; Program B: Modulus Function
+MOD_PROMPT1 .STR "Please enter the dividend: "
+MOD_PROMPT2 .STR "Please enter the divisor: "
+MOD_RESULT  .STR "The modulus is: "
+NL          .BYT '\n'
+JMP MAIN
+MODULO  PSHR FP              ; Save caller's frame pointer
+        MOV FP, SP           ; Establish this function's frame pointer
+        MOV R0, FP           ; R0 = FP (frame pointer)
+        ADDI R0, #12         ; R0 points to the first parameter on the stack
+        ILDR R3, R0          ; Load dividend into R3 (Param1)
+        ILDR R1, R0
+        ADDI R0, #12          ; Move to the second parameter on the stack
+        ILDR R2, R0          ; Load divisor into R2 (Param2)
+        DIV R3, R2           ; R1 = R1 / R2 (integer division)
+        MUL R3, R2           ; R1 = (R1 / R2) * R2
+        SUB R1, R3           
+        MOV R0, FP           ; R0 = FP (frame pointer)
+        ADDI R8, #8
+        SUB R0, R8           ; R0 points to the location to store the result
+        ISTR R4, R0          ; Store the result on the stack
+        POPR FP              ; Restore caller's frame pointer
+        RET                  ; Return to caller
 
-; Constants
-INPUT_PROMPT        .STR    "Enter the dividend: "
-DIVISOR_PROMPT      .STR    "Enter the divisor: "
-RESULT_PROMPT       .STR    "The remainder is: "
-NEWLINE             .BYT    '\n'
-
-; Data
-DIVIDEND            .INT    #0
-DIVISOR             .INT    #0
-
-; Function: mod
-; Parameters: R0 (dividend), R1 (divisor)
-; Returns: R0 (remainder)
-mod:
-    CMP     R1, #0          ; Check if divisor is zero
-    BEQ     INVALID_DIVISOR ; If zero, return an error value (-1)
-
-    MOV     R2, R0          ; Copy the dividend to R2
-    DIV     R2, R1          ; Divide the dividend by the divisor
-
-    MUL     R2, R1          ; Multiply the quotient by the divisor
-    SUB     R0, R0, R2      ; Subtract the result from the original dividend to get the remainder
-
-    RET
-
-INVALID_DIVISOR:
-    MOVI    R0, #-1         ; Set R0 to -1 to indicate an error
-    RET
-
-; Main Program
-MAIN:
-    LDA     R3, INPUT_PROMPT
-    TRP     #5              ; Print the input prompt for the dividend
-    TRP     #2              ; Read the dividend from the user
-    MOV     DIVIDEND, R0    ; Store the dividend
-
-    LDA     R3, DIVISOR_PROMPT
-    TRP     #5              ; Print the input prompt for the divisor
-    TRP     #2              ; Read the divisor from the user
-    MOV     DIVISOR, R0     ; Store the divisor
-
-    ; Call the mod function
-    PSHR    DIVISOR         ; Push the divisor onto the stack
-    PSHR    DIVIDEND        ; Push the dividend onto the stack
-    CALL    mod             ; Call the mod function
-    POPR    R0              ; Retrieve the remainder
-
-    LDA     R3, RESULT_PROMPT
-    TRP     #5              ; Print the result prompt
-    TRP     #1              ; Print the remainder
-    TRP     #5              ; Print newline
-
-    TRP     #0              ; Exit
+MAIN    LDA R3, MOD_PROMPT1  ; Load dividend prompt
+        TRP #5               ; Print the prompt
+        TRP #2               ; Read the dividend
+        PSHR R3
+        ADDI  SP, #-4
+        LDA R3, MOD_PROMPT2  ; Load divisor prompt
+        TRP #5               ; Print the prompt
+        TRP #2               ; Read the divisor
+        PSHR R3              ; Push parameters onto the stack
+        ADDI SP, #-4         ; Allocate space on the stack for the return value
+        CALL MODULO
+        POPR R0              ; Retrieve the result from the stack
+        ADDI SP, #4          ; Deallocate space for parameters
+        POPR R3              ; Restore temporary register
+        LDA R3, MOD_RESULT   ; Load result prompt
+        TRP #5               ; Print the prompt
+        MOV R3, R0           ; Move the result to a register
+        TRP #1               ; Print the result
+        MOVI R3, #10         ; Load newline character
+        TRP #3               ; Print a newline
+        TRP #0               ; Halt the program

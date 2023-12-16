@@ -27,15 +27,18 @@ FIB         PSHR    FP     ; Save the caller's frame pointer
             ADDI    SP, #-4 ; Allocate space on the stack
             CALL    FIB     ; Recursive call
             POPR    R1     ; Retrieve the result
-            ADD     R0, R0, R1 ; Calculate fib(n-1) + fib(n-2)
+            ADD     R0, R1 ; Calculate fib(n-1) + fib(n-2)
             JMP      END_FIB
+
 BASE_CASE   CMPI     R0, #0  ; Base case: fib(0) = 0
             BRZ     R0, BASE_RET
             MOVI    R0, #1  ; Base case: fib(1) = 1
             JMP      END_FIB
+
 BASE_RET    MOVI    R0, #0  ; Return 0 for invalid positions
 END_FIB     POPR    FP     ; Restore the caller's frame pointer
             RET              ; Return to the caller
+            
 MAIN        LDA     R3, FIB_PRMPT ; Load the address of the prompt string
             TRP     #5            ; Print the prompt
             TRP     #2            ; Read an integer from the user

@@ -292,7 +292,6 @@ def process_data_instruction(instruction, line_num):
 
     elif data_type == '.STR':
         if data[0] != '"' or data[-1] != '"':
-            print(data[0])
             num_bytes = int(instruction[1].replace('#', ''))
             data = int(num_bytes).to_bytes(1, "little", signed=True)
             write_to_file(data)

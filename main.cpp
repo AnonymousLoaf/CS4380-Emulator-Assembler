@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include "emu4380.h"
-#include "cache.h"
 
 using namespace std;
 extern unsigned char prog_mem[];

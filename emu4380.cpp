@@ -1,6 +1,5 @@
 #include <iostream>
 #include "emu4380.h"
-#include "cache.h"
 
 using namespace std;
 

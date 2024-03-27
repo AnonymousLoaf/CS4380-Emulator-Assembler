@@ -13,7 +13,6 @@ extern unsigned int cntrl_regs[];
 extern unsigned int mem_cycle_cntr;
 extern unsigned char prog_mem[];
 extern const int memory_size;
-extern unsigned int cache;
 
 extern bool stop_execution;
 

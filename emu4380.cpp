@@ -9,65 +9,21 @@ unsigned char prog_mem[memory_size];
 unsigned int cntrl_regs[3];
 unsigned int reg_file[22];
 bool stop_execution = false;
-unsigned int mem_cycle_cntr = 0;
-unsigned int cache = 0;
-DirectMappedCache myCache(64,16);
 
 unsigned char readByte(unsigned int address) {
-    if (cache == 0) {
-        mem_cycle_cntr += 8;
-        return *reinterpret_cast<unsigned char*>(&prog_mem[address]);
-    } else {
-        int hit = myCache.isCacheHit(address);
-        mem_cycle_cntr += 1;
-        if (hit) {
-            return myCache.getByte(address);
-        } else {
-            mem_cycle_cntr += 8;  // Cache miss penalty
-            myCache.handleCacheMiss(address);
-            return readByte(address);
-        }
-    }
+    return prog_mem[address];
 }
 
 unsigned int readWord(unsigned int address) {
-    if (cache == 0) {
-        mem_cycle_cntr += 8;
-        return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
-    } else {
-        int hit = myCache.isCacheHit(address);
-        if (hit) {
-            //cout << "Cache hit" << endl;
-            mem_cycle_cntr += 1;  // Cache hit
-            return myCache.getWord(address);
-        } else {
-            //cout << "Cache miss" << endl;
-            mem_cycle_cntr += 8;  // Cache miss
-            myCache.handleCacheMiss(address);
-            //myCache.displayCache();
-            return readWord(address);
-        }
-    }
+    return *reinterpret_cast<unsigned int*>(&prog_mem[address]);
 }
 
 void writeByte(unsigned int address, unsigned char byte) {
-    if (cache == 0) {
-        mem_cycle_cntr += 8;
-        *reinterpret_cast<unsigned char*>(&prog_mem[address]) = byte;
-    } else {
-        mem_cycle_cntr += 1;  // Cache hit
-        myCache.writeBack(address, byte);
-    }
+    *reinterpret_cast<unsigned char*>(&prog_mem[address]) = byte;
 }
 
 void writeWord(unsigned int address, unsigned int word) {
-    if (cache == 0) {
-        mem_cycle_cntr += 8;
-        *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
-    } else {
-        mem_cycle_cntr += 1;  // Cache hit
-        myCache.writeBack(address, word);
-    }
+    *reinterpret_cast<unsigned int*>(&prog_mem[address]) = word;
 }
 
 void fetch() {

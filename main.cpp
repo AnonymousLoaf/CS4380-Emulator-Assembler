@@ -7,34 +7,12 @@
 using namespace std;
 extern unsigned char prog_mem[];
 extern const int memory_size;
-extern unsigned int cache;
-extern DirectMappedCache myCache;
 
 int main(int argc, char* argv[]) {
     ifstream binFile;
 
-    if (argc < 2 || argc > 3) {
+    if (argc != 2) {
         cerr << "Usage: " << argv[0] << " <file_path>" << endl;
-        exit(1);
-    }
-
-    else if (argc == 2) {
-        cache = 0;
-    }
-
-    else if (argc == 3) {
-        if (string(argv[2]) == "0") {
-            cache = 0;
-        } else if (string(argv[2]) == "1") {
-            cache = 1;
-        } else {
-            cerr << "Invalid cache configuration. Aborting.\n";
-            exit(2);
-        }
-    }
-
-    else {
-        cerr << "Unknown Error. Aborting.\n";
         exit(1);
     }
 
